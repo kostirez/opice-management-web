@@ -61,4 +61,14 @@ export class CustomerDetailComponent implements OnInit {
       });
     }
   }
+
+  createNewOrder() {
+    // todo
+    confirm('toto neni implementovano')
+  }
+
+  editUser() {
+    // todo
+    confirm('toto neni implementovano')
+  }
 }

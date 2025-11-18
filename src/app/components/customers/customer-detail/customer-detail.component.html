@@ -2,7 +2,7 @@
   <div class="header">
     <button class="btn btn-secondary" routerLink="/customers">← Back to Customers</button>
     <div class="actions" *ngIf="customer">
-      <button class="btn btn-primary">Edit Customer</button>
+      <button class="btn btn-primary" (click)="createNewOrder()">Edit Customer</button>
       <button class="btn btn-danger" (click)="deleteCustomer()">Delete</button>
     </div>
   </div>
@@ -55,8 +55,8 @@
     <div class="detail-card">
       <div class="section-header">
         <h3>Recent Orders</h3>
-        <button class="btn btn-primary" [routerLink]="['/orders/new']"
-                [queryParams]="{customerId: customer.id}">+ New Order</button>
+        <button class="btn btn-primary"
+                (click)="createNewOrder()">+ New Order</button>
       </div>
       <div class="orders-list" *ngIf="customer.orders && customer.orders.length > 0">
         <div class="order-item" *ngFor="let order of customer.orders"
