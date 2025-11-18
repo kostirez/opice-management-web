@@ -1,0 +1,80 @@
+<div class="container">
+  <div class="header">
+    <button class="btn btn-secondary" routerLink="/customers">← Back to Customers</button>
+    <div class="actions" *ngIf="customer">
+      <button class="btn btn-primary">Edit Customer</button>
+      <button class="btn btn-danger" (click)="deleteCustomer()">Delete</button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading customer details...</div>
+
+  <div class="customer-detail" *ngIf="customer && !loading">
+    <div class="detail-header">
+      <h1>{{ customer.name }}</h1>
+      <span class="invoice-badge">Invoice ID: {{ customer.invoiceStaticId }}</span>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>Billing Information</h3>
+        <div class="info-row">
+          <label>Official Name:</label>
+          <span>{{ customer.billing.officialName }}</span>
+        </div>
+        <div class="info-row">
+          <label>ICO:</label>
+          <span>{{ customer.billing.ico }}</span>
+        </div>
+        <div class="info-row" *ngIf="customer.billing.dic">
+          <label>DIC:</label>
+          <span>{{ customer.billing.dic }}</span>
+        </div>
+        <div class="address">
+          <h4>Billing Address</h4>
+          <p>
+            {{ customer.billing.address.street }}<br>
+            {{ customer.billing.address.postCode }} {{ customer.billing.address.city }}<br>
+            {{ customer.billing.address.country }}
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <h3>Delivery Address</h3>
+        <div class="address">
+          <p>
+            {{ customer.deliveryAddress.street }}<br>
+            {{ customer.deliveryAddress.postCode }} {{ customer.deliveryAddress.city }}<br>
+            {{ customer.deliveryAddress.country }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="section-header">
+        <h3>Recent Orders</h3>
+        <button class="btn btn-primary" [routerLink]="['/orders/new']"
+                [queryParams]="{customerId: customer.id}">+ New Order</button>
+      </div>
+      <div class="orders-list" *ngIf="customer.orders && customer.orders.length > 0">
+        <div class="order-item" *ngFor="let order of customer.orders"
+             [routerLink]="['/orders', order.id]">
+          <div class="order-info">
+            <h4>Order #{{ order.id }}</h4>
+            <p>First Delivery: {{ order.firstDelivery | date }}</p>
+            <span class="status" [class.active]="order.active">
+              {{ order.active ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!customer.orders || customer.orders.length === 0">
+        <p>No orders found for this customer</p>
+        <button class="btn btn-primary" [routerLink]="['/orders/new']"
+                [queryParams]="{customerId: customer.id}">Create First Order</button>
+      </div>
+    </div>
+  </div>
+</div>

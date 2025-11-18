@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="header">
+    <h2>👥 Customers</h2>
+    <button class="btn btn-primary" routerLink="/customers/new">+ Add Customer</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading customers...</div>
+
+  <div class="customer-grid" *ngIf="!loading">
+    <div class="customer-card" *ngFor="let customer of customers"
+         [routerLink]="['/customer', customer.documentId]">
+      <h3>{{ customer.name }}</h3>
+      <p class="company">{{ customer.billing.officialName }}</p>
+      <p class="address">{{ customer.deliveryAddress.city }}, {{ customer.deliveryAddress.country }}</p>
+      <div class="customer-meta">
+        <span class="invoice-id">Invoice ID: {{ customer.invoiceStaticId }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && customers.length === 0">
+    <h3>No customers found</h3>
+    <p>Start by adding your first customer</p>
+    <button class="btn btn-primary" routerLink="/customers/new">+ Add Customer</button>
+  </div>
+</div>
