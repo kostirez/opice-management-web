@@ -1,0 +1,61 @@
+<div class="container">
+  <div class="header">
+    <h2>📋 Action Detail</h2>
+    <a class="btn btn-primary" routerLink="/actions">← Back to Actions</a>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading action...</div>
+
+  <div *ngIf="!loading && action" class="action-card">
+    <div class="action-header">
+      <div class="action-info">
+        <h3>{{ action.action_type?.name || 'Unknown Action' }} <small>({{ action.documentId }})</small></h3>
+        <span class="batch-info">Batch #{{ action.batch?.id }}</span>
+      </div>
+      <div class="action-status">
+        <span class="status" [class]="'status-' + action.state">
+          {{ getStatusLabel(action.state) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="action-details">
+      <div class="detail-row">
+        <span class="label">Customer:</span>
+        <span>{{ action.batch?.order?.customer?.name || 'Unknown' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Plant:</span>
+        <span>{{ action.plantBatch?.plant?.name || 'Unknown' }} ({{ action.plantBatch?.amount || 0 }}x)</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Scheduled:</span>
+        <span>{{ action.timestamp | date:'medium' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Time Spent:</span>
+        <span>{{ formatTime(action.timeSpent) }}</span>
+      </div>
+    </div>
+
+    <div class="sections">
+      <div class="section">
+        <h4>Related</h4>
+        <ul>
+          <li *ngIf="action.batch?.documentId">
+            Batch: <a [routerLink]="['/batch', action.batch.documentId]">{{ action.batch.documentId }}</a>
+          </li>
+          <li *ngIf="action.batch?.order?.documentId">
+            Order: <a [routerLink]="['/order', action.batch.order.documentId]">{{ action.batch.order.documentId }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !action">
+    <h3>Action not found</h3>
+    <p>It seems this action does not exist.</p>
+    <a class="btn btn-primary" routerLink="/actions">← Back to Actions</a>
+  </div>
+</div>

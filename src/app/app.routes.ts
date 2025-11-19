@@ -6,6 +6,7 @@ import { BatchListComponent } from './components/batches/batch-list.component';
 import { ActionListComponent } from './components/actions/action-list.component';
 import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
 import { BatchDetailComponent } from './components/batches/batch-detail/batch-detail.component';
+import { ActionDetailComponent } from './components/actions/action-detail/action-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/customers', pathMatch: 'full' },
@@ -16,5 +17,6 @@ export const routes: Routes = [
   { path: 'batches', component: BatchListComponent },
   { path: 'batch/:ducumentId', component: BatchDetailComponent },
   { path: 'actions', component: ActionListComponent },
+  { path: 'action/:ducumentId', component: ActionDetailComponent },
   { path: '**', redirectTo: '/customers' }
 ];

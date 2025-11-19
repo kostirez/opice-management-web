@@ -37,7 +37,7 @@ import {FormsModule} from '@angular/forms';
       <div class="loading" *ngIf="loading">Loading actions...</div>
 
       <div class="actions-list" *ngIf="!loading">
-        <div class="action-card" *ngFor="let action of filteredActions">
+        <div class="action-card" *ngFor="let action of filteredActions" [routerLink]="['/action', action.documentId]">
           <div class="action-header">
             <div class="action-info">
               <h3>{{ action.action_type?.name || 'Unknown Action' }}</h3>
