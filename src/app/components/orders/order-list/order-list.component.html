@@ -1,0 +1,45 @@
+<div class="container">
+  <div class="header">
+    <h2>🛒 Orders</h2>
+    <button class="btn btn-primary" routerLink="/orders/new">+ Add Order</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn" [class.active]="activeFilter === 'all'"
+            (click)="setFilter('all')">All Orders</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'active'"
+            (click)="setFilter('active')">Active Only</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'inactive'"
+            (click)="setFilter('inactive')">Inactive Only</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading orders...</div>
+
+  <div class="orders-grid" *ngIf="!loading">
+    <div class="order-card" *ngFor="let order of filteredOrders"
+         [routerLink]="['/orders', order.id]">
+      <div class="order-header">
+        <h3>Order #{{ order.id }}</h3>
+        <span class="status" [class.active]="order.active">
+              {{ order.active ? 'Active' : 'Inactive' }}
+            </span>
+      </div>
+      <div class="order-details">
+        <p class="customer">👤 {{ order.customer?.name || 'Unknown Customer' }}</p>
+        <p class="delivery">📅 First Delivery: {{ order.firstDelivery | date }}</p>
+        <p class="plants">🌱 {{ order.plantsToGrow?.length || 0 }} plant varieties</p>
+        <div class="delivery-days" *ngIf="order.deliveryTimes?.daysInWeek?.length">
+              <span class="delivery-day" *ngFor="let day of order.deliveryTimes.daysInWeek">
+                {{ getDayName(day) }}
+              </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredOrders.length === 0">
+    <h3>No orders found</h3>
+    <p>Start by creating your first order</p>
+    <button class="btn btn-primary" routerLink="/orders/new">+ Add Order</button>
+  </div>
+</div>
