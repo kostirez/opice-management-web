@@ -5,6 +5,7 @@ import { OrderListComponent } from './components/orders/order-list/order-list.co
 import { BatchListComponent } from './components/batches/batch-list.component';
 import { ActionListComponent } from './components/actions/action-list.component';
 import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
+import { BatchDetailComponent } from './components/batches/batch-detail/batch-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/customers', pathMatch: 'full' },
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'orders', component: OrderListComponent },
   { path: 'order/:ducumentId', component: OrderDetailComponent },
   { path: 'batches', component: BatchListComponent },
+  { path: 'batch/:ducumentId', component: BatchDetailComponent },
   { path: 'actions', component: ActionListComponent },
   { path: '**', redirectTo: '/customers' }
 ];

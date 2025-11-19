@@ -1,0 +1,58 @@
+<div class="container">
+  <div class="header">
+    <h2>🌱 Batch Detail</h2>
+    <a class="btn btn-primary" routerLink="/batches">← Back to Batches</a>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading batch...</div>
+
+  <div *ngIf="!loading && batch" class="batch-card">
+    <div class="batch-header">
+      <h3>Batch #{{ batch.id }} <small>({{ batch.documentId }})</small></h3>
+      <span class="status" [class]="'status-' + batch.state">
+        {{ getStatusLabel(batch.state) }}
+      </span>
+    </div>
+
+    <div class="batch-details">
+      <p class="order">🛒 Order #{{ batch.order?.id || 'N/A' }}</p>
+      <p class="customer" *ngIf="batch.order?.customer">
+        👤 {{ batch.order.customer.name }}
+      </p>
+      <p class="due-date">📅 Due: {{ batch.dueToDate | date }}</p>
+
+      <div class="plants" *ngIf="batch.plantsToGrow?.length">
+        <h4>Plants:</h4>
+        <div class="plant-list">
+          <span class="plant-item" *ngFor="let plantBatch of batch.plantsToGrow">
+            {{ plantBatch.amount }}x {{ plantBatch.plant?.name || 'Unknown' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="actions-progress" *ngIf="batch.actions?.length">
+        <small>Actions: {{ getCompletedActions() }}/{{ batch.actions.length }} completed</small>
+        <div class="progress-bar">
+          <div class="progress" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sections" *ngIf="batch.actions?.length">
+      <div class="section">
+        <h4>Actions</h4>
+        <ul>
+          <li *ngFor="let a of batch.actions">
+            {{ a.timestamp | date:'short' }} — {{ a.action_type?.name || 'Action' }} — {{ getStatusLabel(a.state) }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !batch">
+    <h3>Batch not found</h3>
+    <p>It seems this batch does not exist.</p>
+    <a class="btn btn-primary" routerLink="/batches">← Back to Batches</a>
+  </div>
+</div>

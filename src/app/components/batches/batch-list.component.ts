@@ -30,7 +30,7 @@ import { Batch } from '../../models';
 
       <div class="batches-grid" *ngIf="!loading">
         <div class="batch-card" *ngFor="let batch of filteredBatches"
-             [routerLink]="['/batches', batch.id]">
+             [routerLink]="['/batch', batch.documentId]">
           <div class="batch-header">
             <h3>Batch #{{ batch.id }}</h3>
             <span class="status" [class]="'status-' + batch.state">
