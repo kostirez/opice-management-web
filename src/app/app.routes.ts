@@ -4,12 +4,14 @@ import { CustomerDetailComponent } from './components/customers/customer-detail/
 import { OrderListComponent } from './components/orders/order-list/order-list.component';
 import { BatchListComponent } from './components/batches/batch-list.component';
 import { ActionListComponent } from './components/actions/action-list.component';
+import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/customers', pathMatch: 'full' },
   { path: 'customers', component: CustomerListComponent },
   { path: 'customer/:id', component: CustomerDetailComponent },
   { path: 'orders', component: OrderListComponent },
+  { path: 'order/:ducumentId', component: OrderDetailComponent },
   { path: 'batches', component: BatchListComponent },
   { path: 'actions', component: ActionListComponent },
   { path: '**', redirectTo: '/customers' }

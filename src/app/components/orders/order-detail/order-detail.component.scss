@@ -1,0 +1,25 @@
+@import '../order-list/order-list.component.scss';
+
+/* Additional detail-specific tweaks */
+.sections {
+  margin-top: 1.5rem;
+}
+
+.section {
+  margin-bottom: 1.25rem;
+}
+
+.section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c5530;
+}
+
+.section ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.section li {
+  margin: 0.25rem 0;
+  color: #495057;
+}

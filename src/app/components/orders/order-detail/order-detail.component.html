@@ -1,0 +1,66 @@
+<div class="container">
+  <div class="header">
+    <h2>🧾 Order Detail</h2>
+    <a class="btn btn-primary" routerLink="/orders">← Back to Orders</a>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading order...</div>
+
+  <div *ngIf="!loading && order" class="order-card">
+    <div class="order-header">
+      <h3>Order #{{ order.id }} <small>({{ order.documentId }})</small></h3>
+      <span class="status" [class.active]="order.active">
+        {{ order.active ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+
+    <div class="order-details">
+      <p class="customer">👤 {{ order.customer?.name || 'Unknown Customer' }}</p>
+      <p class="delivery">📅 First Delivery: {{ order.firstDelivery | date }}</p>
+      <p class="plants">🌱 {{ order.plantsToGrow?.length || 0 }} plant varieties</p>
+
+      <div class="delivery-days" *ngIf="order.deliveryTimes?.daysInWeek?.length">
+        <span class="delivery-day" *ngFor="let day of order.deliveryTimes.daysInWeek">
+          {{ getDayName(day) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="sections">
+      <div class="section" *ngIf="order.plantsToGrow?.length">
+        <h4>Plant Batches</h4>
+        <ul>
+          <li *ngFor="let pb of order.plantsToGrow">
+            {{ pb.amount }}x {{ pb.plant?.name }}
+            <span *ngIf="pb.growStrategy"> — strategy: {{ pb.growStrategy.name }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="section" *ngIf="order.batches?.length">
+        <h4>Production Batches</h4>
+        <ul>
+          <li *ngFor="let b of order.batches">
+            Batch {{ b.documentId }} — state: {{ b.state }} — due: {{ b.dueToDate | date }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h4>Billing & Price List</h4>
+        <p>Price list: {{ order.price_list?.name || 'N/A' }}</p>
+        <div *ngIf="order.customer?.billing as billing">
+          <p>Official: {{ billing.officialName }}</p>
+          <p>ICO: {{ billing.ico }} <span *ngIf="billing.dic">/ DIC: {{ billing.dic }}</span></p>
+          <p>Address: {{ billing.address?.street }}, {{ billing.address?.city }} {{ billing.address?.postCode }}, {{ billing.address?.country }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !order">
+    <h3>Order not found</h3>
+    <p>It seems this order does not exist.</p>
+    <a class="btn btn-primary" routerLink="/orders">← Back to Orders</a>
+  </div>
+</div>

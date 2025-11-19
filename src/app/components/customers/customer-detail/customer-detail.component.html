@@ -60,7 +60,7 @@
       </div>
       <div class="orders-list" *ngIf="customer.orders && customer.orders.length > 0">
         <div class="order-item" *ngFor="let order of customer.orders"
-             [routerLink]="['/orders', order.id]">
+             [routerLink]="['/order', order.documentId]">
           <div class="order-info">
             <h4>Order #{{ order.id }}</h4>
             <p>First Delivery: {{ order.firstDelivery | date }}</p>
