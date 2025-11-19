@@ -3,7 +3,7 @@ import { CustomerListComponent } from './components/customers/customer/customer-
 import { CustomerDetailComponent } from './components/customers/customer-detail/customer-detail.component';
 import { OrderListComponent } from './components/orders/order-list/order-list.component';
 import { BatchListComponent } from './components/batches/batch-list.component';
-import { ActionListComponent } from './components/actions/action-list.component';
+import { ActionListComponent } from './components/actions/action-list/action-list.component';
 import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
 import { BatchDetailComponent } from './components/batches/batch-detail/batch-detail.component';
 import { ActionDetailComponent } from './components/actions/action-detail/action-detail.component';
