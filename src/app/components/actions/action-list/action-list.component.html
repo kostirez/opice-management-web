@@ -12,6 +12,12 @@
   </div>
 
   <div class="filters">
+    <button class="filter-btn" [class.active]="activeFilter === 'today'"
+            (click)="setFilter('today')">Today</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'nextWeek'"
+            (click)="setFilter('nextWeek')">Next week</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'nextMonth'"
+            (click)="setFilter('nextMonth')">Next month</button>
     <button class="filter-btn" [class.active]="activeFilter === 'all'"
             (click)="setFilter('all')">All Actions</button>
     <button class="filter-btn" [class.active]="activeFilter === 'waiting'"

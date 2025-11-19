@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ActionService } from '../../../services/action.service';
 import { Action } from '../../../models';
 import {FormsModule} from '@angular/forms';
+import dayjs from 'dayjs';
 
 @Component({
   selector: 'app-action-list',
@@ -17,7 +18,7 @@ export class ActionListComponent implements OnInit {
   filteredActions: Action[] = [];
   uniqueBatches: any[] = [];
   loading = true;
-  activeFilter = 'all';
+  activeFilter = 'today';
   selectedBatchId = '';
 
   constructor(private actionService: ActionService) {}
@@ -29,7 +30,8 @@ export class ActionListComponent implements OnInit {
   loadActions() {
     this.loading = true;
     this.actionService.getActions({
-      populate: 'batch,batch.order,batch.order.customer,plantBatch.plant,action_type'
+      populate: 'batch,batch.order,batch.order.customer,plantBatch.plant,action_type',
+      sort: 'timestamp:desc'
     }).subscribe({
       next: (response) => {
         this.actions = response.data;
@@ -67,8 +69,29 @@ export class ActionListComponent implements OnInit {
     let filtered = [...this.actions];
 
     // Apply state filter
-    if (this.activeFilter !== 'all') {
+    if (['waiting','running','done'].includes(this.activeFilter)) {
       filtered = filtered.filter(action => action.state === this.activeFilter);
+    }
+
+    if (this.activeFilter === 'nextWeek') {
+      filtered = filtered.filter(action => {
+        const timestamp = dayjs(action.timestamp);
+        return timestamp.isAfter(dayjs()) && timestamp.isBefore(dayjs().add(7, 'days'));
+      });
+    }
+
+    if (this.activeFilter === 'nextMonth') {
+      filtered = filtered.filter(action => {
+        const timestamp = dayjs(action.timestamp);
+        return timestamp.isAfter(dayjs()) && timestamp.isBefore(dayjs().add(30, 'days'));
+      });
+    }
+
+    if (this.activeFilter === 'today') {
+      filtered = filtered.filter(action => {
+        const timestamp = dayjs(action.timestamp);
+        return timestamp.isSame(dayjs(),"day");
+      });
     }
 
     // Apply batch filter
