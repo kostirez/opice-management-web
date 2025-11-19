@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { BatchService } from '../../../services/batch.service';
 import { Batch } from '../../../models';
 import dayjs from 'dayjs';
+import { CreateBatchDialogComponent } from '../create-batch-dialog/create-batch-dialog.component';
 
 @Component({
   selector: 'app-batch-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CreateBatchDialogComponent],
   templateUrl: 'batch-list.component.html',
   styleUrl: 'batch-list.component.scss',
 })
@@ -17,6 +18,8 @@ export class BatchListComponent implements OnInit {
   filteredBatches: Batch[] = [];
   loading = true;
   activeFilter = 'all';
+  showCreateDialog = false;
+  creating = false;
 
   constructor(private batchService: BatchService) {}
 
@@ -94,5 +97,30 @@ export class BatchListComponent implements OnInit {
     if (!batch.actions?.length) return 0;
     const completed = this.getCompletedActions(batch);
     return (completed / batch.actions.length) * 100;
+  }
+
+  openCreateDialog() {
+    this.showCreateDialog = true;
+  }
+
+  closeCreateDialog() {
+    if (this.creating) return;
+    this.showCreateDialog = false;
+  }
+
+  onCreateBatch(payload: { orderId: number; date: string }) {
+    if (!payload?.orderId || !payload?.date) return;
+    this.creating = true;
+    this.batchService.generateSingleBatch(payload.orderId, payload.date).subscribe({
+      next: () => {
+        this.creating = false;
+        this.showCreateDialog = false;
+        this.loadBatches();
+      },
+      error: (err) => {
+        console.error('Failed to create batch', err);
+        this.creating = false;
+      }
+    });
   }
 }
