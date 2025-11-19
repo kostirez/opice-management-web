@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="header">
+    <h2>🌱 Batches</h2>
+    <button class="btn btn-primary" routerLink="/batches/new">+ Create Batch</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn" [class.active]="activeFilter === 'all'"
+            (click)="setFilter('all')">All Batches</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'last7days'"
+            (click)="setFilter('last7days')">Last 7 days</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'future'"
+            (click)="setFilter('future')">Future</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'lastMonth'"
+            (click)="setFilter('lastMonth')">last month</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'waiting'"
+            (click)="setFilter('waiting')">Waiting</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'running'"
+            (click)="setFilter('running')">In Progress</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'done'"
+            (click)="setFilter('done')">Completed</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading batches...</div>
+
+  <div class="batches-grid" *ngIf="!loading">
+    <div class="batch-card" *ngFor="let batch of filteredBatches"
+         [routerLink]="['/batch', batch.documentId]">
+      <div class="batch-header">
+        <h3>Batch #{{ batch.id }}</h3>
+        <span class="status" [class]="'status-' + batch.state">
+              {{ getStatusLabel(batch.state) }}
+            </span>
+      </div>
+      <div class="batch-details">
+        <p class="order">🛒 Order #{{ batch.order?.id || 'N/A' }}</p>
+        <p class="customer" *ngIf="batch.order?.customer">
+          👤 {{ batch.order.customer.name }}
+        </p>
+        <p class="due-date">📅 Due: {{ batch.dueToDate | date }}</p>
+        <div class="plants" *ngIf="batch.plantsToGrow?.length">
+          <h4>Plants:</h4>
+          <div class="plant-list">
+                <span class="plant-item" *ngFor="let plantBatch of batch.plantsToGrow">
+                  {{ plantBatch.amount }}x {{ plantBatch.plant?.name || 'Unknown' }}
+                </span>
+          </div>
+        </div>
+        <div class="actions-progress" *ngIf="batch.actions?.length">
+          <small>Actions: {{ getCompletedActions(batch) }}/{{ batch.actions.length }} completed</small>
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="getProgressPercentage(batch)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredBatches.length === 0">
+    <h3>No batches found</h3>
+    <p>Start by creating your first batch</p>
+    <button class="btn btn-primary" routerLink="/batches/new">+ Create Batch</button>
+  </div>
+</div>
