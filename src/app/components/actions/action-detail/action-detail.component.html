@@ -16,6 +16,7 @@
         <span class="status" [class]="'status-' + action.state">
           {{ getStatusLabel(action.state) }}
         </span>
+        <button class="btn btn-success" *ngIf="action.state !== 'done'" (click)="openResolveDialog()">Resolve</button>
       </div>
     </div>
 
@@ -58,4 +59,11 @@
     <p>It seems this action does not exist.</p>
     <a class="btn btn-primary" routerLink="/actions">← Back to Actions</a>
   </div>
+
+  <!-- Resolve Action Dialog -->
+  <app-resolve-action-dialog
+    *ngIf="showResolveDialog"
+    (cancel)="closeResolveDialog()"
+    (submit)="onResolveSubmit($event)">
+  </app-resolve-action-dialog>
 </div>

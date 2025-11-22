@@ -36,9 +36,10 @@ export class ActionService {
     return this.apiService.delete<Action>(this.endpoint, documentId);
   }
 
-  fulfillAction(id: number, timeInSeconds: number): Observable<ApiResponse<Action>> {
+  fulfillAction(id: number, timeInSeconds: number, plantAmount?: number): Observable<ApiResponse<Action>> {
     return this.http.put<ApiResponse<Action>>(`${this.baseUrl}/${this.endpoint}/fulfillAction/${id}`, {
-      timeInSeconds
+      timeInSeconds,
+      plantAmount
     });
   }
 

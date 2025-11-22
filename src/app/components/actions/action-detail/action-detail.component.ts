@@ -4,11 +4,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Action } from '../../../models';
 import { ActionService } from '../../../services/action.service';
+import { ResolveActionDialogComponent } from './resolve-action-dialog/resolve-action-dialog.component';
 
 @Component({
   selector: 'app-action-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ResolveActionDialogComponent],
   templateUrl: './action-detail.component.html',
   styleUrls: ['./action-detail.component.scss']
 })
@@ -16,6 +17,7 @@ export class ActionDetailComponent implements OnInit, OnDestroy {
   loading = true;
   action?: Action;
   private sub?: Subscription;
+  showResolveDialog = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -68,5 +70,27 @@ export class ActionDetailComponent implements OnInit, OnDestroy {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+  }
+
+  openResolveDialog() {
+    this.showResolveDialog = true;
+  }
+
+  closeResolveDialog() {
+    this.showResolveDialog = false;
+  }
+
+  onResolveSubmit(payload: { timestamp: string; timeSpent: number; amount: number }) {
+    console.log('Resolve payload:', payload);
+    const actionId = this.action?.id;
+    if (!actionId) {
+      console.error('Action ID is missing');
+      return;
+    }
+    this.actionService.fulfillAction(actionId, payload.timeSpent, payload.amount)
+      .subscribe(response => {
+        console.log('Action fulfilled successfully:', response);
+      })
+    this.showResolveDialog = false;
   }
 }
