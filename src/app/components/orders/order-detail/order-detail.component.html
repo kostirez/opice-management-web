@@ -14,6 +14,17 @@
       </span>
     </div>
 
+    <div class="invoice-tools">
+      <label>
+        Month:
+        <input type="month" [(ngModel)]="selectedMonth" />
+      </label>
+      <button class="btn btn-secondary" (click)="generateInvoice()" [disabled]="generating || !order.customer">
+        {{ generating ? 'Generating…' : 'Generate Invoice' }}
+      </button>
+      <div class="error" *ngIf="generateError">{{ generateError }}</div>
+    </div>
+
     <div class="order-details">
       <p class="customer">👤 {{ order.customer?.name || 'Unknown Customer' }}</p>
       <p class="delivery">📅 First Delivery: {{ order.firstDelivery | date }}</p>

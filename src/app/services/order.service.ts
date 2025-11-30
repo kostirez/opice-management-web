@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { HttpClient } from '@angular/common/http';
 import { Order, ApiResponse, ApiListResponse } from '../models';
 
 @Injectable({
@@ -8,8 +9,10 @@ import { Order, ApiResponse, ApiListResponse } from '../models';
 })
 export class OrderService {
   private endpoint = 'orders';
+  // Reuse the same API base used across the app
+  private baseUrl = 'http://localhost:1337/api';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private http: HttpClient) {}
 
   getOrders(params?: Record<string, any>): Observable<ApiListResponse<Order>> {
     return this.apiService.get<Order>(this.endpoint, params);
@@ -29,5 +32,14 @@ export class OrderService {
 
   deleteOrder(documentId: string): Observable<void> {
     return this.apiService.delete<Order>(this.endpoint, documentId);
+  }
+
+  /**
+   * Generate invoice PDF for a customer and month.
+   * Month format expected by backend: YYYY-MM
+   */
+  generateInvoice(customerId: string, month: string): Observable<Blob> {
+    const url = `${this.baseUrl}/invoice/${customerId}/${month}`;
+    return this.http.get(url, { responseType: 'blob' });
   }
 }
