@@ -17,7 +17,7 @@
 
   <div class="orders-grid" *ngIf="!loading">
     <div class="order-card" *ngFor="let order of filteredOrders"
-         [routerLink]="['/orders', order.id]">
+         [routerLink]="['/order', order.documentId]">
       <div class="order-header">
         <h3>Order #{{ order.id }}</h3>
         <span class="status" [class.active]="order.active">
