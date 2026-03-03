@@ -7,16 +7,19 @@ import { ActionListComponent } from './components/actions/action-list/action-lis
 import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
 import { BatchDetailComponent } from './components/batches/batch-detail/batch-detail.component';
 import { ActionDetailComponent } from './components/actions/action-detail/action-detail.component';
+import { authGuard } from './guards/auth.guard';
+import { LoginComponent } from './components/auth/login.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/customers', pathMatch: 'full' },
-  { path: 'customers', component: CustomerListComponent },
-  { path: 'customer/:id', component: CustomerDetailComponent },
-  { path: 'orders', component: OrderListComponent },
-  { path: 'order/:ducumentId', component: OrderDetailComponent },
-  { path: 'batches', component: BatchListComponent },
-  { path: 'batch/:ducumentId', component: BatchDetailComponent },
-  { path: 'actions', component: ActionListComponent },
-  { path: 'action/:ducumentId', component: ActionDetailComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'customers', component: CustomerListComponent, canActivate: [authGuard] },
+  { path: 'customer/:id', component: CustomerDetailComponent, canActivate: [authGuard] },
+  { path: 'orders', component: OrderListComponent, canActivate: [authGuard] },
+  { path: 'order/:ducumentId', component: OrderDetailComponent, canActivate: [authGuard] },
+  { path: 'batches', component: BatchListComponent, canActivate: [authGuard] },
+  { path: 'batch/:ducumentId', component: BatchDetailComponent, canActivate: [authGuard] },
+  { path: 'actions', component: ActionListComponent, canActivate: [authGuard] },
+  { path: 'action/:ducumentId', component: ActionDetailComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '/customers' }
 ];

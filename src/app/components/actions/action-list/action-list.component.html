@@ -2,6 +2,14 @@
   <div class="header">
     <h2>📋 Actions</h2>
     <div class="header-actions">
+      <div class="grouping-controls">
+        <label for="grouping">Group by:</label>
+        <select id="grouping" class="filter-select" [(ngModel)]="groupingCriteria" (change)="onGroupingChange()">
+          <option value="none">None</option>
+          <option value="date">Date</option>
+          <option value="customer">Customer</option>
+        </select>
+      </div>
       <select class="filter-select" [(ngModel)]="selectedBatchId" (change)="onBatchFilterChange()">
         <option value="">All Batches</option>
         <option *ngFor="let batch of uniqueBatches" [value]="batch.id">
@@ -31,46 +39,49 @@
   <div class="loading" *ngIf="loading">Loading actions...</div>
 
   <div class="actions-list" *ngIf="!loading">
-    <div class="action-card" *ngFor="let action of filteredActions" [routerLink]="['/action', action.documentId]">
-      <div class="action-header">
-        <div class="action-info">
-          <h3>{{ action.action_type?.name || 'Unknown Action' }}</h3>
-          <span class="batch-info">Batch #{{ action.batch?.id }}</span>
+    <div class="action-group" *ngFor="let group of groupedActions">
+      <h3 class="group-title">{{ group.key }}</h3>
+      <div class="action-card" *ngFor="let action of group.actions" [routerLink]="['/action', action.documentId]">
+        <div class="action-header">
+          <div class="action-info">
+            <h3>{{ action.action_type?.name || 'Unknown Action' }}</h3>
+            <span class="batch-info">Batch #{{ action.batch?.id }}</span>
+          </div>
+          <div class="action-status">
+                <span class="status" [class]="'status-' + action.state">
+                  {{ getStatusLabel(action.state) }}
+                </span>
+            <button *ngIf="action.state === 'waiting'"
+                    class="btn btn-sm btn-primary"
+                    (click)="startAction(action, $event)">
+              Start
+            </button>
+            <button *ngIf="action.state === 'running'"
+                    class="btn btn-sm btn-success"
+                    (click)="completeAction(action, $event)">
+              Complete
+            </button>
+          </div>
         </div>
-        <div class="action-status">
-              <span class="status" [class]="'status-' + action.state">
-                {{ getStatusLabel(action.state) }}
-              </span>
-          <button *ngIf="action.state === 'waiting'"
-                  class="btn btn-sm btn-primary"
-                  (click)="startAction(action, $event)">
-            Start
-          </button>
-          <button *ngIf="action.state === 'running'"
-                  class="btn btn-sm btn-success"
-                  (click)="completeAction(action, $event)">
-            Complete
-          </button>
-        </div>
-      </div>
 
-      <div class="action-details">
-        <div class="detail-row">
-          <span class="label">Customer:</span>
-          <span>{{ action.batch?.order?.customer?.name || 'Unknown' }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">Plant:</span>
-          <span>{{ action.plantBatch?.plant?.name || 'Unknown' }}
-            ({{ action.plantBatch?.amount || 0 }}x)</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">Scheduled:</span>
-          <span>{{ action.timestamp | date:'medium' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="action.timeSpent">
-          <span class="label">Time Spent:</span>
-          <span>{{ formatTime(action.timeSpent) }}</span>
+        <div class="action-details">
+          <div class="detail-row">
+            <span class="label">Customer:</span>
+            <span>{{ action.batch?.order?.customer?.name || 'Unknown' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Plant:</span>
+            <span>{{ action.plantBatch?.plant?.name || 'Unknown' }}
+              ({{ action.plantBatch?.amount || 0 }}x)</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Scheduled:</span>
+            <span>{{ action.timestamp | date:'medium' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="action.timeSpent">
+            <span class="label">Time Spent:</span>
+            <span>{{ formatTime(action.timeSpent) }}</span>
+          </div>
         </div>
       </div>
     </div>

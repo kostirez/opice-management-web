@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-navigation',
@@ -11,12 +13,15 @@ import { RouterModule } from '@angular/router';
       <div class="nav-brand">
         <h1>🌱</h1>
       </div>
-      <ul class="nav-links">
-        <li><a routerLink="/customers" routerLinkActive="active">👥 Customers</a></li>
-        <li><a routerLink="/orders" routerLinkActive="active">🛒 Orders</a></li>
-        <li><a routerLink="/batches" routerLinkActive="active">🌱 Batches</a></li>
-        <li><a routerLink="/actions" routerLinkActive="active">📋 Actions</a></li>
-      </ul>
+      <div class="nav-right" *ngIf="isLoggedIn()">
+        <ul class="nav-links">
+          <li><a routerLink="/customers" routerLinkActive="active">👥 Customers</a></li>
+          <li><a routerLink="/orders" routerLinkActive="active">🛒 Orders</a></li>
+          <li><a routerLink="/batches" routerLinkActive="active">🌱 Batches</a></li>
+          <li><a routerLink="/actions" routerLinkActive="active">📋 Actions</a></li>
+        </ul>
+        <button *ngIf="isLoggedIn()" class="logout-btn" (click)="logout()" title="Logout">Logout</button>
+      </div>
     </nav>
   `,
   styles: [`
@@ -34,6 +39,12 @@ import { RouterModule } from '@angular/router';
       margin: 0;
       font-size: 1.5rem;
       font-weight: 600;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     .nav-links {
@@ -58,6 +69,21 @@ import { RouterModule } from '@angular/router';
       background-color: rgba(255,255,255,0.2);
     }
 
+    .logout-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.6);
+      padding: 0.5rem 0.9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.9);
+    }
+
     @media (max-width: 768px) {
       .navbar {
         flex-direction: column;
@@ -70,4 +96,15 @@ import { RouterModule } from '@angular/router';
     }
   `]
 })
-export class NavigationComponent {}
+export class NavigationComponent {
+  constructor(private auth: AuthService, private router: Router) {}
+
+  isLoggedIn(): boolean {
+    return this.auth.isLoggedIn();
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+}

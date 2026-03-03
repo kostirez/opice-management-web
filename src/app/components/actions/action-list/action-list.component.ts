@@ -16,10 +16,12 @@ import dayjs from 'dayjs';
 export class ActionListComponent implements OnInit {
   actions: Action[] = [];
   filteredActions: Action[] = [];
+  groupedActions: { key: string, actions: Action[] }[] = [];
   uniqueBatches: any[] = [];
   loading = true;
   activeFilter = 'today';
   selectedBatchId = '';
+  groupingCriteria: 'date' | 'customer' | 'none' = 'date';
 
   constructor(private actionService: ActionService) {}
 
@@ -29,14 +31,51 @@ export class ActionListComponent implements OnInit {
 
   loadActions() {
     this.loading = true;
-    this.actionService.getActions({
+    const params: any = {
       populate: 'batch,batch.order,batch.order.customer,plantBatch.plant,action_type',
-      sort: 'timestamp:desc'
-    }).subscribe({
+      sort: 'timestamp:desc',
+      filters: {}
+    };
+
+    // Apply state filter
+    if (['waiting', 'running', 'done'].includes(this.activeFilter)) {
+      params.filters.state = { '$eq': this.activeFilter };
+    }
+
+    if (this.activeFilter === 'nextWeek') {
+      params.filters.timestamp = {
+        '$gt': dayjs().toISOString(),
+        '$lt': dayjs().add(7, 'days').toISOString()
+      };
+    }
+
+    if (this.activeFilter === 'nextMonth') {
+      params.filters.timestamp = {
+        '$gt': dayjs().toISOString(),
+        '$lt': dayjs().add(30, 'days').toISOString()
+      };
+    }
+
+    if (this.activeFilter === 'today') {
+      params.filters.timestamp = {
+        '$gte': dayjs().startOf('day').toISOString(),
+        '$lte': dayjs().endOf('day').toISOString()
+      };
+    }
+
+    // Apply batch filter
+    if (this.selectedBatchId) {
+      params.filters.batch = { 'id': { '$eq': this.selectedBatchId } };
+    }
+
+    this.actionService.getActions(params).subscribe({
       next: (response) => {
         this.actions = response.data;
-        this.extractUniqueBatches();
-        this.applyFilters();
+        this.filteredActions = [...this.actions];
+        this.groupActions();
+        if (this.uniqueBatches.length === 0 || (!this.selectedBatchId && this.activeFilter === 'today')) {
+           this.extractUniqueBatches();
+        }
         this.loading = false;
       },
       error: (error) => {
@@ -44,6 +83,38 @@ export class ActionListComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  groupActions() {
+    if (this.groupingCriteria === 'none') {
+      this.groupedActions = [{ key: 'All Actions', actions: this.filteredActions }];
+      return;
+    }
+
+    const groups: Record<string, Action[]> = {};
+
+    this.filteredActions.forEach(action => {
+      let key = 'Unknown';
+      if (this.groupingCriteria === 'date') {
+        key = dayjs(action.timestamp).format('YYYY-MM-DD');
+      } else if (this.groupingCriteria === 'customer') {
+        key = action.batch?.order?.customer?.name || 'Unknown Customer';
+      }
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(action);
+    });
+
+    this.groupedActions = Object.keys(groups).sort().map(key => ({
+      key,
+      actions: groups[key]
+    }));
+
+    if (this.groupingCriteria === 'date') {
+       this.groupedActions.reverse(); // Newest dates first
+    }
   }
 
   extractUniqueBatches() {
@@ -58,48 +129,19 @@ export class ActionListComponent implements OnInit {
 
   setFilter(filter: string) {
     this.activeFilter = filter;
-    this.applyFilters();
+    this.loadActions();
   }
 
   onBatchFilterChange() {
-    this.applyFilters();
+    this.loadActions();
+  }
+
+  onGroupingChange() {
+    this.groupActions();
   }
 
   applyFilters() {
-    let filtered = [...this.actions];
-
-    // Apply state filter
-    if (['waiting','running','done'].includes(this.activeFilter)) {
-      filtered = filtered.filter(action => action.state === this.activeFilter);
-    }
-
-    if (this.activeFilter === 'nextWeek') {
-      filtered = filtered.filter(action => {
-        const timestamp = dayjs(action.timestamp);
-        return timestamp.isAfter(dayjs()) && timestamp.isBefore(dayjs().add(7, 'days'));
-      });
-    }
-
-    if (this.activeFilter === 'nextMonth') {
-      filtered = filtered.filter(action => {
-        const timestamp = dayjs(action.timestamp);
-        return timestamp.isAfter(dayjs()) && timestamp.isBefore(dayjs().add(30, 'days'));
-      });
-    }
-
-    if (this.activeFilter === 'today') {
-      filtered = filtered.filter(action => {
-        const timestamp = dayjs(action.timestamp);
-        return timestamp.isSame(dayjs(),"day");
-      });
-    }
-
-    // Apply batch filter
-    if (this.selectedBatchId) {
-      filtered = filtered.filter(action => action.batch?.id?.toString() === this.selectedBatchId);
-    }
-
-    this.filteredActions = filtered;
+    // This is now handled by loadActions via backend filters
   }
 
   getStatusLabel(state: string): string {

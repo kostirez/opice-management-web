@@ -18,8 +18,20 @@
 
 .header-actions {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
+}
+
+.grouping-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 500;
+  }
 }
 
 .filter-select {
@@ -85,6 +97,27 @@
   text-align: center;
   padding: 2rem;
   color: #666;
+}
+
+.action-group {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #eee;
+
+  .group-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #444;
+    border-bottom: 2px solid #2c5530;
+    display: inline-block;
+    padding-bottom: 0.25rem;
+  }
+
+  .actions-list {
+    gap: 0.75rem;
+  }
 }
 
 .actions-list {
