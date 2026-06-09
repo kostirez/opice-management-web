@@ -15,55 +15,71 @@
     </div>
 
     <div class="invoice-tools">
-      <label>
-        Month:
-        <input type="month" [(ngModel)]="selectedMonth" />
-      </label>
+      <div class="selector-group">
+        <label>
+          Year:
+          <select [(ngModel)]="selectedYear">
+            <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+          </select>
+        </label>
+        <label>
+          Month:
+          <select [(ngModel)]="selectedMonth">
+            <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+          </select>
+        </label>
+      </div>
       <button class="btn btn-secondary" (click)="generateInvoice()" [disabled]="generating || !order.customer">
         {{ generating ? 'Generating…' : 'Generate Invoice' }}
       </button>
       <div class="error" *ngIf="generateError">{{ generateError }}</div>
     </div>
 
-    <div class="order-details">
-      <p class="customer">👤 {{ order.customer?.name || 'Unknown Customer' }}</p>
-      <p class="delivery">📅 First Delivery: {{ order.firstDelivery | date }}</p>
-      <p class="plants">🌱 {{ order.plantsToGrow?.length || 0 }} plant varieties</p>
-
-      <div class="delivery-days" *ngIf="order.deliveryTimes?.daysInWeek?.length">
-        <span class="delivery-day" *ngFor="let day of order.deliveryTimes.daysInWeek">
-          {{ getDayName(day) }}
-        </span>
+    <div class="order-summary">
+      <div class="summary-item">
+        <span class="label">👤 Customer:</span>
+        <span class="value">{{ order.customer?.name || 'Unknown' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">📅 First Delivery:</span>
+        <span class="value">{{ order.firstDelivery | date }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">💳 Price List:</span>
+        <span class="value">{{ order.price_list?.name || 'N/A' }}</span>
       </div>
     </div>
 
     <div class="sections">
+      <!-- Items for Delivery Section -->
       <div class="section" *ngIf="order.plantsToGrow?.length">
-        <h4>Plant Batches</h4>
-        <ul>
-          <li *ngFor="let pb of order.plantsToGrow">
-            {{ pb.amount }}x {{ pb.plant?.name }}
-            <span *ngIf="pb.growStrategy"> — strategy: {{ pb.growStrategy.name }}</span>
-          </li>
-        </ul>
+        <h4>Items for Delivery</h4>
+        <div class="items-grid">
+          <div class="item-card" *ngFor="let pb of order.plantsToGrow">
+            <div class="item-name">{{ pb.plant?.name }}</div>
+            <div class="item-amount">{{ pb.amount }}x</div>
+            <div class="item-strategy" *ngIf="pb.growStrategy">Strategy: {{ pb.growStrategy.name }}</div>
+          </div>
+        </div>
       </div>
 
-      <div class="section" *ngIf="order.batches?.length">
-        <h4>Production Batches</h4>
-        <ul>
-          <li *ngFor="let b of order.batches">
-            Batch {{ b.documentId }} — state: {{ b.state }} — due: {{ b.dueToDate | date }}
-          </li>
-        </ul>
+      <!-- Delivery Times Section -->
+      <div class="section" *ngIf="order.deliveryTimes?.daysInWeek?.length">
+        <h4>Delivery Times</h4>
+        <div class="delivery-days">
+          <span class="delivery-day" *ngFor="let item of order.deliveryTimes.daysInWeek">
+            {{ getDayName(item.day)}} - {{ order.deliveryTimes.preferTimeOfDelivery }}
+          </span>
+        </div>
       </div>
 
+      <!-- Billing Section -->
       <div class="section">
-        <h4>Billing & Price List</h4>
-        <p>Price list: {{ order.price_list?.name || 'N/A' }}</p>
-        <div *ngIf="order.customer?.billing as billing">
-          <p>Official: {{ billing.officialName }}</p>
-          <p>ICO: {{ billing.ico }} <span *ngIf="billing.dic">/ DIC: {{ billing.dic }}</span></p>
-          <p>Address: {{ billing.address?.street }}, {{ billing.address?.city }} {{ billing.address?.postCode }}, {{ billing.address?.country }}</p>
+        <h4>Billing Details</h4>
+        <div *ngIf="order.customer?.billing as billing" class="billing-info">
+          <p><strong>Official:</strong> {{ billing.officialName }}</p>
+          <p><strong>ICO:</strong> {{ billing.ico }} <span *ngIf="billing.dic">/ <strong>DIC:</strong> {{ billing.dic }}</span></p>
+          <p><strong>Address:</strong> {{ billing.address?.street }}, {{ billing.address?.city }} {{ billing.address?.postCode }}, {{ billing.address?.country }}</p>
         </div>
       </div>
     </div>

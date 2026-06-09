@@ -4,6 +4,17 @@ import { ApiService } from './api.service';
 import { HttpClient } from '@angular/common/http';
 import { Order, ApiResponse, ApiListResponse } from '../models';
 
+export interface OrderForDelivery {
+  customerName: string;
+  orderId: number;
+  itemsForDelivery: {
+    recipeId: number,
+    recipeName: string,
+    amount: number,
+    unit: string
+  }[]
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,12 +45,20 @@ export class OrderService {
     return this.apiService.delete<Order>(this.endpoint, documentId);
   }
 
+  getDeliveryList(date?: string): Observable<OrderForDelivery[]> {
+    const params: any = {};
+    if (date) {
+      params.date = date;
+    }
+    return this.http.get<any[]>(`${this.baseUrl}/orders/delivery-list`, { params });
+  }
+
   /**
    * Generate invoice PDF for a customer and month.
    * Month format expected by backend: YYYY-MM
    */
   generateInvoice(customerId: string, month: string): Observable<Blob> {
-    const url = `${this.baseUrl}/invoice/${customerId}/${month}`;
+    const url = `${this.baseUrl}/invoice-delivery/${customerId}/${month}`;
     return this.http.get(url, { responseType: 'blob' });
   }
 }

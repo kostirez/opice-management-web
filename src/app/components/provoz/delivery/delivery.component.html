@@ -1,0 +1,89 @@
+<div class="operation-container">
+  <div class="header">
+    <div class="nav-buttons">
+      <button class="btn-back" routerLink="/provoz">← Back</button>
+      <button class="btn-nav" routerLink="/provoz/packaging">← Previous</button>
+      <button class="btn-nav" routerLink="/provoz/cleaning">Next →</button>
+    </div>
+    <h2>Doručení (Delivery)</h2>
+    <button class="btn-primary" (click)="startDelivery()" [disabled]="loading || pendingDeliveries.length === 0">
+      Zahájit rozvoz
+    </button>
+  </div>
+
+  <div *ngIf="loading && pendingDeliveries.length === 0 && onWayDeliveries.length === 0" class="loading">
+    Načítání...
+  </div>
+
+  <div class="delivery-sections" *ngIf="!loading || pendingDeliveries.length > 0 || onWayDeliveries.length > 0">
+    <!-- Pending Section -->
+    <div class="section">
+      <h3>Zabaleno</h3>
+      <div class="delivery-list">
+        <div *ngFor="let delivery of pendingDeliveries" class="delivery-card pending">
+          <div class="card-info">
+            <strong>{{ delivery.order?.customer?.name || 'Neznámý zákazník' }}</strong>
+            <ul>
+              <li *ngFor="let item of delivery.deliveredItems">
+                {{ item.plant?.name }}: {{ item.amount }} {{ item.unit }}
+              </li>
+            </ul>
+          </div>
+          <div class="card-actions">
+            <span class="status-badge">PENDING</span>
+          </div>
+        </div>
+        <p *ngIf="pendingDeliveries.length === 0">Žádné dodávky k připravení.</p>
+      </div>
+    </div>
+
+    <!-- On Way Section -->
+    <div class="section">
+      <h3>Na cestě</h3>
+      <div class="delivery-list">
+        <div *ngFor="let delivery of onWayDeliveries" class="delivery-card on-way">
+          <div class="card-info">
+            <strong>{{ delivery.order?.customer?.name || 'Neznámý zákazník' }}</strong>
+            <ul>
+              <li *ngFor="let item of delivery.deliveredItems">
+                {{ item.plant?.name }}: {{ item.amount }} {{ item.unit }}
+              </li>
+            </ul>
+
+            <div class="boxes-management">
+              <div class="box-group">
+                <label>Předané bedýnky:</label>
+                <div *ngFor="let hb of delivery.newHandedBoxes; let i = index" class="box-row">
+                  <select [(ngModel)]="hb.box">
+                    <option *ngFor="let type of boxTypes" [value]="type">{{ type }}</option>
+                  </select>
+                  <input type="number" [(ngModel)]="hb.amount" min="1">
+                  <button class="btn-icon-remove" (click)="removeHandedBox(delivery, i)">×</button>
+                </div>
+                <button class="btn-small" (click)="addHandedBox(delivery)">+ Přidat</button>
+              </div>
+
+              <div class="box-group">
+                <label>Vrácené bedýnky:</label>
+                <div *ngFor="let rb of delivery.newReturnedBoxes; let i = index" class="box-row">
+                  <select [(ngModel)]="rb.box">
+                    <option *ngFor="let type of boxTypes" [value]="type">{{ type }}</option>
+                  </select>
+                  <input type="number" [(ngModel)]="rb.amount" min="1">
+                  <button class="btn-icon-remove" (click)="removeReturnedBox(delivery, i)">×</button>
+                </div>
+                <button class="btn-small" (click)="addReturnedBox(delivery)">+ Přidat</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-success" (click)="markAsDelivered(delivery)" [disabled]="loading">
+              Doručeno
+            </button>
+          </div>
+        </div>
+        <p *ngIf="onWayDeliveries.length === 0">Žádné dodávky na cestě.</p>
+      </div>
+    </div>
+  </div>
+</div>

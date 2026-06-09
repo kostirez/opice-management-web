@@ -35,6 +35,10 @@ export class ApiService {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}/${endpoint}`, { data }, { headers: this.getAuthHeaders() });
   }
 
+  patch<T>(endpoint: string, documentId: string, data: any): Observable<ApiResponse<T>> {
+    return this.http.patch<ApiResponse<T>>(`${this.baseUrl}/${endpoint}/${documentId}`, { data }, { headers: this.getAuthHeaders() });
+  }
+
   put<T>(endpoint: string, documentId: string, data: any): Observable<ApiResponse<T>> {
     return this.http.put<ApiResponse<T>>(`${this.baseUrl}/${endpoint}/${documentId}`, { data }, { headers: this.getAuthHeaders() });
   }

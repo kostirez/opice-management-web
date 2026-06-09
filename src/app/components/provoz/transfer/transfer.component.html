@@ -1,0 +1,123 @@
+<div class="transfer-container">
+  <div class="header">
+    <div class="nav-buttons">
+      <button class="btn-back" routerLink="/provoz">← Back</button>
+      <button class="btn-nav" routerLink="/provoz/planting">← Previous</button>
+      <button class="btn-nav" routerLink="/provoz/harvest">Next →</button>
+    </div>
+    <h1>Transfer (Přesun na světlo)</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading actions...</div>
+
+  <div *ngIf="!loading && dayActions.length === 0" class="no-actions">
+    No move to light actions planned for today.
+  </div>
+
+  <table *ngIf="dayActions.length > 0" class="action-table">
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Trays Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let action of dayActions">
+      <td>
+        <div class="plant-info">
+          <span class="plant-name">{{ action.plant?.name }}</span>
+          <span class="plant-code">{{ action.plant?.code }}</span>
+        </div>
+      </td>
+      <td>{{ action.trayCount }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="pending-section" *ngIf="cropCyclesToday.length > 0">
+    <h2>Move to Light (Today)</h2>
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>Plant</th>
+          <th>Tray</th>
+          <th>Planned Move Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cycle of cropCyclesToday" class="highlight-today">
+          <td>{{ cycle.plantName }}</td>
+          <td>{{ cycle.trayCode }}</td>
+          <td>{{ cycle.moveToLightDay | date:'mediumDate' }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="openMoveModal(cycle)">
+              Move to Light
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pending-section" *ngIf="cropCyclesOther.length > 0">
+    <h2>Move to Light (Other)</h2>
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>Plant</th>
+          <th>Tray</th>
+          <th>Planned Move Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cycle of cropCyclesOther">
+          <td>{{ cycle.plantName }}</td>
+          <td>{{ cycle.trayCode }}</td>
+          <td>{{ cycle.moveToLightDay | date:'mediumDate' }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="openMoveModal(cycle)">
+              Move to Light
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Move to Light Modal -->
+  <div class="modal-backdrop" *ngIf="showMoveModal" (click)="closeMoveModal()"></div>
+  <div class="modal" *ngIf="showMoveModal">
+    <div class="modal-header">
+      <h3>Move to Light</h3>
+      <button class="close-btn" (click)="closeMoveModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="move-info">
+        <p>Plant: <strong>{{ selectedCropCycle?.plantName }}</strong></p>
+        <p>Tray: <strong>{{ selectedCropCycle?.trayCode }}</strong></p>
+      </div>
+      <div class="form-group">
+        <label for="shelf-code">Shelf Code:</label>
+        <input
+          id="shelf-code"
+          type="text"
+          class="form-control"
+          [(ngModel)]="shelfCode"
+          placeholder="Enter shelf code (e.g. L1)"
+        />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeMoveModal()">Cancel</button>
+      <button
+        class="btn btn-success"
+        [disabled]="!shelfCode"
+        (click)="confirmMove()"
+      >
+        Confirm Move
+      </button>
+    </div>
+  </div>
+</div>

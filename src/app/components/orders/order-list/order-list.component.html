@@ -27,10 +27,10 @@
       <div class="order-details">
         <p class="customer">👤 {{ order.customer?.name || 'Unknown Customer' }}</p>
         <p class="delivery">📅 First Delivery: {{ order.firstDelivery | date }}</p>
-        <p class="plants">🌱 {{ order.plantsToGrow?.length || 0 }} plant varieties</p>
+        <p class="plants">🌱 {{ order.itemsForDelivery?.length || 0 }} plant varieties</p>
         <div class="delivery-days" *ngIf="order.deliveryTimes?.daysInWeek?.length">
               <span class="delivery-day" *ngFor="let day of order.deliveryTimes.daysInWeek">
-                {{ getDayName(day) }}
+                {{ getDayName(day.day) }}
               </span>
         </div>
       </div>

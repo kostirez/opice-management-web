@@ -1,0 +1,87 @@
+<div class="growing-room-container">
+  <div class="header">
+    <h1>Growing Room (Pěstírna)</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading data...</div>
+
+  <div *ngIf="!loading" class="content-grid">
+    <!-- Trays Section -->
+    <div class="section trays-section">
+      <h2>Trays Status</h2>
+
+      <div class="trays-by-state">
+        <div *ngFor="let group of traysByState" class="state-group">
+          <h3>{{ group.state }} ({{ group.trays.length }})</h3>
+          <div class="trays-grid">
+            <div
+              *ngFor="let tray of group.trays"
+              class="tray-item"
+              [class.selected]="selectedTray?.id === tray.id"
+              (click)="selectTray(tray)"
+            >
+              <span class="tray-code">{{ tray.code }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="in-use-section">
+        <h3>In Use</h3>
+        <div *ngFor="let shelfGroup of shelves" class="shelf-group">
+          <h4>Shelf {{ shelfGroup.shelf }}</h4>
+          <div class="trays-grid">
+            <div
+              *ngFor="let tray of shelfGroup.trays"
+              class="tray-item in-use"
+              [class.selected]="selectedTray?.id === tray.id"
+              (click)="selectTray(tray)"
+            >
+              <span class="tray-code">{{ tray.code }}</span>
+              <span class="place-code">{{ tray.placeCode }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="otherInUseTrays.length > 0" class="shelf-group">
+          <h4>Other Positions</h4>
+          <div class="trays-grid">
+            <div
+              *ngFor="let tray of otherInUseTrays"
+              class="tray-item in-use"
+              [class.selected]="selectedTray?.id === tray.id"
+              (click)="selectTray(tray)"
+            >
+              <span class="tray-code">{{ tray.code }}</span>
+              <span class="place-code">{{ tray.placeCode }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crop Cycles Section -->
+    <div class="section cycles-section">
+      <h2>Active Crop Cycles</h2>
+      <div class="cycles-list">
+        <div
+          *ngFor="let cycle of activeCropCycles"
+          class="cycle-item"
+          [class.highlighted]="isCycleHighlighted(cycle)"
+        >
+          <div class="cycle-info">
+            <span class="plant-name">{{ cycle.plantName }}</span>
+            <span class="tray-info">Tray: {{ cycle.trayCode }}</span>
+            <span class="state-badge" [attr.data-state]="cycle.state">{{ cycle.state }}</span>
+          </div>
+          <div class="cycle-dates">
+            <span>Seeding: {{ cycle.seedingDay }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="activeCropCycles.length === 0" class="no-data">
+        No active crop cycles.
+      </div>
+    </div>
+  </div>
+</div>

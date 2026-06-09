@@ -17,8 +17,9 @@ import { Router } from '@angular/router';
         <ul class="nav-links">
           <li><a routerLink="/customers" routerLinkActive="active">👥 Customers</a></li>
           <li><a routerLink="/orders" routerLinkActive="active">🛒 Orders</a></li>
-          <li><a routerLink="/batches" routerLinkActive="active">🌱 Batches</a></li>
-          <li><a routerLink="/actions" routerLinkActive="active">📋 Actions</a></li>
+          <li><a routerLink="/growing-room" routerLinkActive="active">🌱 Growing Room</a></li>
+          <li><a routerLink="/operation-plan" routerLinkActive="active">📅 Plan</a></li>
+          <li><a routerLink="/provoz" routerLinkActive="active">⚙️ Provoz</a></li>
         </ul>
         <button *ngIf="isLoggedIn()" class="logout-btn" (click)="logout()" title="Logout">Logout</button>
       </div>

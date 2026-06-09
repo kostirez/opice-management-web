@@ -26,7 +26,7 @@ export class OrderListComponent implements OnInit {
   loadOrders() {
     this.loading = true;
     this.orderService.getOrders({
-      populate: 'customer,plantsToGrow,deliveryTimes'
+      populate: 'customer'
     }).subscribe({
       next: (response) => {
         this.orders = response.data;

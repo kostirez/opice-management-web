@@ -1,0 +1,157 @@
+<div class="operation-container">
+  <div class="header">
+    <div class="nav-buttons">
+      <button class="btn-back" routerLink="/provoz">← Back</button>
+      <button class="btn-nav" routerLink="/provoz/harvest">← Previous</button>
+      <button class="btn-nav" routerLink="/provoz/delivery">Next →</button>
+    </div>
+    <h2>Balení (Packaging)</h2>
+  </div>
+
+  <div *ngIf="loading" class="loading">Načítání...</div>
+
+  <div class="packaging-layout" *ngIf="!loading">
+    <div class="top-row">
+      <!-- Left Section: Harvested Crops -->
+      <div class="harvest-section">
+        <h3>Dnešní sklizeň</h3>
+        <div *ngIf="todayBatchHarvest; else noHarvest">
+          <table>
+            <thead>
+              <tr>
+                <th>Plodina</th>
+                <th>Množství</th>
+                <th>Jednotka</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let crop of todayBatchHarvest.harvestedCrops">
+                <td>{{ crop.plant?.name }}</td>
+                <td>{{ crop.amount }}</td>
+                <td>{{ crop.unit }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noHarvest>
+          <p>Dnes zatím nebyla sklizena žádná batch.</p>
+        </ng-template>
+      </div>
+
+      <!-- Middle Section: Orders for Delivery -->
+      <div class="orders-section">
+        <div class="section-header">
+          <h3>Objednávky k doručení dnes</h3>
+          <button class="btn-secondary" (click)="createUnassignedDelivery()">Vytvořit nepřiřazenou dodávku</button>
+        </div>
+        <div *ngIf="deliveryOrders.length > 0; else noOrders">
+          <div class="order-card" *ngFor="let order of deliveryOrders"
+               [class.selected]="isOrderSelected(order)"
+               [class.saved]="isOrderSaved(order)">
+            <div class="order-header">
+              <strong>{{ order.customerName }}</strong>
+              <button (click)="selectOrderForDelivery(order)" [disabled]="isOrderSelected(order) || isOrderSaved(order)">
+                {{ isOrderSaved(order) ? 'Uloženo' : (isOrderSelected(order) ? 'Vybráno' : 'Vybrat pro balení') }}
+              </button>
+            </div>
+            <ul>
+              <li *ngFor="let crop of order.itemsForDelivery">
+                {{ crop.recipeName }}: {{ crop.amount }} {{ crop.unit }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <ng-template #noOrders>
+          <p>Žádné objednávky k doručení pro dnešní den.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Create Delivery Batch (Grid) -->
+    <div class="delivery-grid" *ngIf="activeDeliveries.length > 0">
+      <div class="delivery-card" *ngFor="let delivery of activeDeliveries; let deliveryIdx = index" [class.saved-card]="delivery.saved">
+        <div class="card-header">
+          <h3>Dodávka: {{ delivery.order ? delivery.order.customerName : 'Nepřiřazená' }}</h3>
+          <span *ngIf="delivery.saved" class="saved-badge">Uloženo</span>
+          <button class="btn-close" (click)="removeActiveDelivery(deliveryIdx)" *ngIf="!delivery.saved">X</button>
+        </div>
+
+        <div class="delivery-items" [class.disabled-content]="delivery.saved">
+          <h4>Položky k doručení</h4>
+          <div class="items-grid">
+            <div *ngFor="let item of delivery.deliveredItems; let i = index" class="item-tile" [class.packed]="item.packed">
+              <div class="tile-header">
+                <span class="item-name">{{ item.plant?.name || item.recipe?.name || 'Nová položka' }} - {{ item.amount }}x {{ item.unit }}</span>
+                <button class="btn-remove" (click)="removeDeliveryItem(delivery, i)" *ngIf="!item.packed">×</button>
+              </div>
+
+              <div class="tile-content">
+                <!-- Recipe case -->
+                <div *ngIf="item.recipe" class="recipe-packing">
+                  <!-- Box input for recipes with BOX units -->
+                  <div *ngIf="item.unit !== 'GRAM'" class="box-count-input">
+                    <div class="input-row">
+                      <label>Skutečný počet boxů:</label>
+                      <input type="number" [(ngModel)]="item.packedAmount" placeholder="Počet boxů" [disabled]="delivery.saved || false">
+                    </div>
+                  </div>
+
+                  <div class="recipe-items-list">
+                    <div *ngFor="let pi of item.packedItems; let piIdx = index" class="recipe-plant-item">
+                      <div class="plant-info">
+                        <strong>{{ pi.plant.name }}</strong>
+                        <span class="expected-percent">({{ item.recipe.items![piIdx].percent }}%)</span>
+                      </div>
+                      <div class="input-row">
+                        <input type="number" [(ngModel)]="pi.amount" placeholder="Grams" [disabled]="delivery.saved || false">
+                        <span class="unit">g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="!item.packedItems" class="no-items-warning">
+                    <button class="btn-small" (click)="initPackedItems(item)">Inicializovat recept</button>
+                  </div>
+                </div>
+
+                <!-- Plant case -->
+                <div *ngIf="item.plant" class="plant-packing">
+                  <div class="expected-value">Cíl: {{ item.amount }}g</div>
+                  <div class="real-value">
+                    <input type="number" [(ngModel)]="item.packedAmount" placeholder="Zadejte váhu" [disabled]="delivery.saved || false">
+                    <span class="unit">g</span>
+                  </div>
+                </div>
+
+                <!-- Unassigned new item selection (only if neither plant nor recipe is set) -->
+                <div *ngIf="!item.plant && !item.recipe" class="item-selectors">
+                  <select [(ngModel)]="item.plant" [compareWith]="comparePlants" (change)="item.recipe = undefined" [disabled]="delivery.saved ?? false">
+                    <option [ngValue]="undefined">-- Vyberte plodinu --</option>
+                    <option *ngFor="let plant of availablePlants" [ngValue]="plant">{{ plant.name }}</option>
+                  </select>
+                  <select [(ngModel)]="item.recipe" [compareWith]="compareRecipes" (change)="item.plant = undefined; initPackedItems(item)" [disabled]="delivery.saved ?? false">
+                    <option [ngValue]="undefined">-- Vyberte recept --</option>
+                    <option *ngFor="let recipe of availableRecipes" [ngValue]="recipe">{{ recipe.name }}</option>
+                  </select>
+                  <input type="number" [(ngModel)]="item.amount" placeholder="Celkové množství" class="amount-input" [disabled]="delivery.saved ?? false">
+                </div>
+              </div>
+
+              <div class="tile-actions" *ngIf="item.plant || item.recipe">
+                <button class="btn-pack" (click)="packItem(delivery, item)" [disabled]="item.packed || (item.plant && !item.packedAmount) || (item.recipe && !item.packedItems)">
+                  {{ item.packed ? 'Zabaleno' : 'Zabalit' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-add-item" (click)="addDeliveryItem(delivery)" *ngIf="!delivery.creating && !delivery.saved">+ Přidat položku</button>
+        </div>
+
+        <div class="actions" *ngIf="!delivery.saved">
+          <button class="btn-primary" (click)="saveBatchDelivery(delivery, deliveryIdx)" [disabled]="delivery.creating">
+            {{ delivery.creating ? 'Ukládám...' : 'Zabalit a uložit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

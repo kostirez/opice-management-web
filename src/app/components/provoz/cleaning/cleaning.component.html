@@ -1,0 +1,36 @@
+<div class="operation-container">
+  <div class="header">
+    <div class="nav-buttons">
+      <button class="btn-back" routerLink="/provoz">← Back</button>
+      <button class="btn-nav" routerLink="/provoz/delivery">← Previous</button>
+      <button class="btn-nav" routerLink="/provoz/planting">Next →</button>
+    </div>
+    <h1>Čištění (Cleaning)</h1>
+    <button
+      class="btn btn-success"
+      *ngIf="washingTrays.length > 0"
+      (click)="markAllAsEmpty()"
+      [disabled]="loading"
+    >
+      Všechny tacy umyty
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading trays...</div>
+
+  <div *ngIf="!loading && washingTrays.length === 0" class="no-trays">
+    No trays currently in cleaning state.
+  </div>
+
+  <div class="trays-grid" *ngIf="!loading && washingTrays.length > 0">
+    <div *ngFor="let tray of washingTrays" class="tray-card">
+      <div class="tray-info">
+        <span class="tray-code">{{ tray.code }}</span>
+        <span class="tray-place" *ngIf="tray.placeCode">{{ tray.placeCode }}</span>
+      </div>
+      <button class="btn btn-primary" (click)="markAsEmpty(tray)">
+        Umyto
+      </button>
+    </div>
+  </div>
+</div>

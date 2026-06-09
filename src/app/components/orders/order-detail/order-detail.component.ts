@@ -17,15 +17,40 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   loading = true;
   order?: Order;
   private sub?: Subscription;
-  // Invoice generation UI state
-  selectedMonth: string = new Date().toISOString().slice(0, 7); // YYYY-MM
+  selectedMonth: number = new Date().getMonth(); // 0-11
+  selectedYear: number = new Date().getFullYear();
+  years: number[] = [];
+  months = [
+    { value: 0, label: 'January' },
+    { value: 1, label: 'February' },
+    { value: 2, label: 'March' },
+    { value: 3, label: 'April' },
+    { value: 4, label: 'May' },
+    { value: 5, label: 'June' },
+    { value: 6, label: 'July' },
+    { value: 7, label: 'August' },
+    { value: 8, label: 'September' },
+    { value: 9, label: 'October' },
+    { value: 10, label: 'November' },
+    { value: 11, label: 'December' }
+  ];
   generating = false;
   generateError?: string;
 
   constructor(
     private route: ActivatedRoute,
     private orderService: OrderService,
-  ) {}
+  ) {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 2; i <= currentYear + 1; i++) {
+      this.years.push(i);
+    }
+    // Default to last month
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    this.selectedMonth = d.getMonth();
+    this.selectedYear = d.getFullYear();
+  }
 
   ngOnInit(): void {
     this.sub = this.route.paramMap.subscribe(params => {
@@ -43,7 +68,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   fetchOrder(documentId: string) {
     this.loading = true;
     this.orderService.getOrder(documentId, {
-      populate: 'customer,plantsToGrow.plant,plantsToGrow.growStrategy,deliveryTimes,price_list,batches'
+      populate: 'customer.billing.address,itemsForDelivery,deliveryTimes.daysInWeek,price_list'
     }).subscribe({
       next: (response) => {
         this.order = response.data;
@@ -57,9 +82,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   getDayName(day: string): string {
+    console.log(`Fetching day name for ${day}`);
     const dayNames: Record<string, string> = {
-      mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu',
-      fri: 'Fri', sat: 'Sat', sun: 'Sun'
+      mon: 'Pondělí', tue: 'Úterý', wed: 'Středa', thu: 'Čtvrtek',
+      fri: 'Pátek', sat: 'Sobota', sun: 'Neděle'
     };
     return dayNames[day] || day;
   }
@@ -70,17 +96,17 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       this.generateError = 'Missing customer information for this order.';
       return;
     }
-    if (!this.selectedMonth) {
-      this.generateError = 'Please select a month.';
-      return;
-    }
 
     this.generating = true;
     const customerId = String(this.order.customer.id);
-    const month = this.selectedMonth; // expected format YYYY-MM
+    // Format: YYYY-MM-DD as expected by backend (e.g. 2024-04-01)
+    const monthStr = (Number(this.selectedMonth) + 1).toString().padStart(2, '0');
+    console.log(`Generating invoice for customer ${customerId} for month ${monthStr}/${this.selectedYear}`);
+    const month = `${this.selectedYear}-${monthStr}-01`;
+
     this.orderService.generateInvoice(customerId, month).subscribe({
       next: (blob) => {
-        const fileName = `invoice-${this.order?.customer?.name || customerId}-${month}.pdf`;
+        const fileName = `invoice-${this.order?.customer?.name || customerId}-${this.selectedYear}-${monthStr}.pdf`;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

@@ -1,0 +1,169 @@
+<div class="planting-container">
+  <div class="header">
+    <div class="nav-buttons">
+      <button class="btn-back" routerLink="/provoz">← Back</button>
+      <button class="btn-nav" routerLink="/provoz/cleaning">← Previous</button>
+      <button class="btn-nav" routerLink="/provoz/transfer">Next →</button>
+    </div>
+    <h1>Planting (Sázení)</h1>
+    <button class="btn btn-secondary" (click)="openManualPlanting()">
+      + Plant Manually
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading actions...</div>
+
+  <div *ngIf="!loading && dayActions.length === 0" class="no-actions">
+    No seeding actions planned for today.
+  </div>
+
+  <table *ngIf="dayActions.length > 0" class="action-table">
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Trays Count</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let action of dayActions">
+      <td>
+        <div class="plant-info">
+          <span class="plant-name">{{ action.plant?.name }}</span>
+          <span class="plant-code">{{ action.plant?.code }}</span>
+        </div>
+      </td>
+      <td>{{ action.trayCount }}</td>
+      <td>
+        <button class="btn btn-primary" (click)="openTraySelection(action)">
+          Plant
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="pending-section" *ngIf="pendingCropCycles.length > 0">
+    <h2>Pending for Germination</h2>
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>Plant</th>
+          <th>Tray</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cycle of pendingCropCycles">
+          <td>{{ cycle.plantName }}</td>
+          <td>{{ cycle.trayCode }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="openMoveModal(cycle)">
+              Move to Germination
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tray Selection Modal -->
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-header">
+      <h3 *ngIf="!isManual">Select Trays for {{ selectedPlant?.name }}</h3>
+      <h3 *ngIf="isManual">Manual Planting</h3>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="isManual" class="manual-selection">
+        <div class="form-group">
+          <label for="plant-select">Select Plant:</label>
+          <select id="plant-select" class="form-control" [(ngModel)]="selectedPlant">
+            <option [ngValue]="null">-- Select Plant --</option>
+            <option *ngFor="let plant of allPlants" [ngValue]="plant">
+              {{ plant.name }} ({{ plant.code }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tray-count">Number of Trays:</label>
+          <input
+            id="tray-count"
+            type="number"
+            class="form-control"
+            [(ngModel)]="manualTrayCount"
+            min="1"
+            (change)="selectedTrays = []"
+          />
+        </div>
+      </div>
+
+      <p *ngIf="!isManual">Please select <strong>{{ selectedAction?.trayCount }}</strong> trays.</p>
+      <p *ngIf="isManual && selectedPlant">Please select <strong>{{ manualTrayCount }}</strong> trays for <strong>{{ selectedPlant.name }}</strong>.</p>
+
+      <p>Selected: {{ selectedTrays.length }} / {{ isManual ? manualTrayCount : (selectedAction?.trayCount || 0) }}</p>
+
+      <div class="trays-grid">
+        <div
+          *ngFor="let tray of emptyTrays"
+          class="tray-item"
+          [class.selected]="isTraySelected(tray)"
+          (click)="toggleTraySelection(tray)"
+        >
+          <div class="tray-code">{{ tray.code }}</div>
+          <div class="tray-place">{{ tray.placeCode }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="emptyTrays.length === 0" class="no-trays">
+        No empty trays available!
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button
+        class="btn btn-success"
+        [disabled]="!canSubmit()"
+        (click)="confirmPlanting()"
+      >
+        Confirm Planting
+      </button>
+    </div>
+  </div>
+
+  <!-- Move to Germination Modal -->
+  <div class="modal-backdrop" *ngIf="showMoveModal" (click)="closeMoveModal()"></div>
+  <div class="modal" *ngIf="showMoveModal">
+    <div class="modal-header">
+      <h3>Move to Germination</h3>
+      <button class="close-btn" (click)="closeMoveModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="move-info">
+        <p>Plant: <strong>{{ selectedCropCycle?.plantName }}</strong></p>
+        <p>Tray: <strong>{{ selectedCropCycle?.trayCode }}</strong></p>
+      </div>
+      <div class="form-group">
+        <label for="shelf-code">Shelf Code:</label>
+        <input
+          id="shelf-code"
+          type="text"
+          class="form-control"
+          [(ngModel)]="shelfCode"
+          placeholder="Enter shelf code (e.g. A1)"
+        />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeMoveModal()">Cancel</button>
+      <button
+        class="btn btn-success"
+        [disabled]="!shelfCode"
+        (click)="confirmMove()"
+      >
+        Confirm Move
+      </button>
+    </div>
+  </div>
+</div>
