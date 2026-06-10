@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse, ApiListResponse } from '../models';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:1337/api';
-
+  private baseUrl = environment.apiBaseUrl;
   constructor(private http: HttpClient) {}
 
   get<T>(endpoint: string, params?: Record<string, any>): Observable<ApiListResponse<T>> {
