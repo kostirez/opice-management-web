@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import {environment} from '../../environments/environment';
 
 interface StrapiLoginResponse {
   jwt: string;
@@ -9,7 +10,7 @@ interface StrapiLoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = 'http://localhost:1337/api';
+  private baseUrl =  environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
 

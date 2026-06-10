@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { HttpClient } from '@angular/common/http';
 import { Order, ApiResponse, ApiListResponse } from '../models';
+import {environment} from '../../environments/environment';
 
 export interface OrderForDelivery {
   customerName: string;
@@ -21,7 +22,7 @@ export interface OrderForDelivery {
 export class OrderService {
   private endpoint = 'orders';
   // Reuse the same API base used across the app
-  private baseUrl = 'http://localhost:1337/api';
+  private baseUrl = environment.apiBaseUrl;
 
   constructor(private apiService: ApiService, private http: HttpClient) {}
 

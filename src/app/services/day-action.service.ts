@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { DayActionDto, ApiResponse, ApiListResponse } from '../models';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class DayActionService {
   }
 
   getCustomList(params?: Record<string, any>): Observable<DayActionDto[]> {
-    return this.http.get<DayActionDto[]>(`http://localhost:1337/api/${this.endpoint}/custom-list`, {
+    return this.http.get<DayActionDto[]>(`${environment.apiBaseUrl}/${this.endpoint}/custom-list`, {
       params,
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt')}` }
     });

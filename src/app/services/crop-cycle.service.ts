@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { CropCycleDto, ApiResponse, ApiListResponse, CropCycleCustomListItemDto } from '../models';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class CropCycleService {
   }
 
   getCustomList(params?: Record<string, any>): Observable<CropCycleCustomListItemDto[]> {
-    return this.http.get<CropCycleCustomListItemDto[]>(`http://localhost:1337/api/${this.endpoint}/custom-list`, {
+    return this.http.get<CropCycleCustomListItemDto[]>(`${environment.apiBaseUrl}/${this.endpoint}/custom-list`, {
       params,
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt')}` }
     });
@@ -32,7 +33,7 @@ export class CropCycleService {
   }
 
   createMany(data: any[]): Observable<CropCycleDto[]> {
-    return this.http.post<CropCycleDto[]>(`http://localhost:1337/api/${this.endpoint}/create-many`, { data }, {
+    return this.http.post<CropCycleDto[]>(`${environment.apiBaseUrl}/${this.endpoint}/create-many`, { data }, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt')}` }
     });
   }
