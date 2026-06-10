@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: process.env['STRAPI_URL'] || '/api'
+  apiBaseUrl: 'https://glorious-laughter-79358b8501.strapiapp.com/api'
 };
