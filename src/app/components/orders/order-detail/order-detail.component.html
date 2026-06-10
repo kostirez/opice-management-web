@@ -52,13 +52,12 @@
 
     <div class="sections">
       <!-- Items for Delivery Section -->
-      <div class="section" *ngIf="order.plantsToGrow?.length">
+      <div class="section" *ngIf="order.itemsForDelivery?.length">
         <h4>Items for Delivery</h4>
         <div class="items-grid">
-          <div class="item-card" *ngFor="let pb of order.plantsToGrow">
-            <div class="item-name">{{ pb.plant?.name }}</div>
+          <div class="item-card" *ngFor="let pb of order.itemsForDelivery">
+            <div class="item-name">{{ pb.recipe?.name }}</div>
             <div class="item-amount">{{ pb.amount }}x</div>
-            <div class="item-strategy" *ngIf="pb.growStrategy">Strategy: {{ pb.growStrategy.name }}</div>
           </div>
         </div>
       </div>
