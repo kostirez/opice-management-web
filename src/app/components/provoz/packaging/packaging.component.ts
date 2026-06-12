@@ -306,7 +306,7 @@ export class PackagingComponent implements OnInit {
       deliveredItems: delivery.deliveredItems.map((item: any) => ({
         plant: item.plant?.id,
         recipe: item.recipe?.id,
-        amount: item.packedAmount || item.amount,
+        amount: (item.packedItems as []).reduce((acc, cur: any) => acc + cur.amount, 0),
         unit: item.unit
       }))
     };
@@ -332,7 +332,7 @@ export class PackagingComponent implements OnInit {
       deliveredItems: delivery.deliveredItems.map((item: any) => ({
         recipe: item.recipe?.id,
         plant: item.plant?.id,
-        amount: item.packedAmount || item.amount,
+        amount: (item.packedItems as []).reduce((acc, cur: any) => acc + cur.amount, 0),
         unit: item.unit
       })),
       batch_harvest: this.todayBatchHarvest?.id
