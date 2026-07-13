@@ -1,10 +1,6 @@
 <div class="planting-container">
+  <app-provoz-navigation></app-provoz-navigation>
   <div class="header">
-    <div class="nav-buttons">
-      <button class="btn-back" routerLink="/provoz">← Back</button>
-      <button class="btn-nav" routerLink="/provoz/cleaning">← Previous</button>
-      <button class="btn-nav" routerLink="/provoz/transfer">Next →</button>
-    </div>
     <h1>Planting (Sázení)</h1>
     <button class="btn btn-secondary" (click)="openManualPlanting()">
       + Plant Manually
@@ -26,17 +22,18 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let action of dayActions">
+    <tr *ngFor="let action of dayActions" [class.completed]="isActionCompleted(action)">
       <td>
         <div class="plant-info">
           <span class="plant-name">{{ action.plant?.name }}</span>
           <span class="plant-code">{{ action.plant?.code }}</span>
+          <span class="status-badge" *ngIf="isActionCompleted(action)">✓ Planted</span>
         </div>
       </td>
-      <td>{{ action.trayCount }}</td>
+      <td>{{ getPlantedTraysCount(action.plant?.id) }} / {{ action.trayCount }}</td>
       <td>
-        <button class="btn btn-primary" (click)="openTraySelection(action)">
-          Plant
+        <button class="btn btn-primary" (click)="openTraySelection(action)" [disabled]="isActionCompleted(action)">
+          {{ isActionCompleted(action) ? 'Planted' : 'Plant' }}
         </button>
       </td>
     </tr>

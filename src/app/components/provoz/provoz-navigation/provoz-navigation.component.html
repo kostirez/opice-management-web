@@ -1,0 +1,17 @@
+<div class="provoz-nav-container">
+  <div class="nav-items-row">
+    <a routerLink="/provoz" class="nav-tile back-tile">
+      <span class="icon">⬅️</span>
+      <span class="label">Zpět</span>
+    </a>
+    <div class="separator"></div>
+    <a *ngFor="let item of navItems"
+       [routerLink]="item.link"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-tile">
+      <span class="icon">{{ item.icon }}</span>
+      <span class="label">{{ item.label }}</span>
+    </a>
+  </div>
+</div>

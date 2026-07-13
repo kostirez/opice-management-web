@@ -289,4 +289,20 @@
       color: #2c5530;
     }
   }
+
+  .completed {
+    background-color: #f8fcf8;
+    opacity: 0.8;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2c5530;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+  }
 }

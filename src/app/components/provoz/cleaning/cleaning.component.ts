@@ -5,10 +5,12 @@ import { TrayDto } from '../../../models';
 
 import { RouterModule } from '@angular/router';
 
+import { ProvozNavigationComponent } from '../provoz-navigation/provoz-navigation.component';
+
 @Component({
   selector: 'app-cleaning',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ProvozNavigationComponent],
   templateUrl: './cleaning.component.html',
   styleUrls: ['./cleaning.component.scss']
 })

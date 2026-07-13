@@ -7,10 +7,12 @@ import { forkJoin } from 'rxjs';
 
 import { RouterModule } from '@angular/router';
 
+import { ProvozNavigationComponent } from '../provoz-navigation/provoz-navigation.component';
+
 @Component({
   selector: 'app-delivery',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ProvozNavigationComponent],
   templateUrl: './delivery.component.html',
   styleUrls: ['./delivery.component.scss']
 })

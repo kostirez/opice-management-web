@@ -4,16 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { DayActionService } from '../../../services/day-action.service';
 import { TrayService } from '../../../services/tray.service';
 import { CropCycleService } from '../../../services/crop-cycle.service';
-import {DayActionDto, TrayDto, PlantDto, CropCycleCustomListItemDto} from '../../../models';
+import {DayActionDto, TrayDto, PlantDto, CropCycleCustomListItemDto, ID} from '../../../models';
 import { getCurrentDayInWeek } from '../../../utils/date-utils';
 import { PlantService } from '../../../services/plant.service';
 
-import { RouterModule } from '@angular/router';
+import { ProvozNavigationComponent } from '../provoz-navigation/provoz-navigation.component';
 
 @Component({
   selector: 'app-planting',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ProvozNavigationComponent],
   templateUrl: './planting.component.html',
   styleUrls: ['./planting.component.scss']
 })
@@ -32,6 +32,7 @@ export class PlantingComponent implements OnInit {
   showModal = false;
   showMoveModal = false;
   loading = false;
+  todayCropCycles: CropCycleCustomListItemDto[] = [];
 
   constructor(
     private dayActionService: DayActionService,
@@ -45,6 +46,19 @@ export class PlantingComponent implements OnInit {
     this.loadEmptyTrays();
     this.loadPlants();
     this.loadPendingCropCycles();
+    this.loadTodayCropCycles();
+  }
+
+  loadTodayCropCycles() {
+    const today = new Date().toISOString().split('T')[0];
+    this.cropCycleService.getCustomList({ seedingDay: today }).subscribe({
+      next: (cropCycles) => {
+        this.todayCropCycles = cropCycles;
+      },
+      error: (err) => {
+        console.error('Error loading today crop cycles', err);
+      }
+    });
   }
 
   loadPendingCropCycles() {
@@ -195,10 +209,24 @@ console.log('confirm move')
     this.cropCycleService.createMany(data).subscribe({
       next: () => {
         this.closeModal();
+        this.loadPendingCropCycles();
+        this.loadTodayCropCycles();
+        this.loadEmptyTrays();
       },
       error: (err) => {
         console.error('Error creating crop cycles', err);
       }
     });
+  }
+
+  getPlantedTraysCount(plantId: ID | undefined): number {
+    if (!plantId) return 0;
+    return this.todayCropCycles.filter(c => c.plantName === this.allPlants.find(p => p.id === plantId)?.name).length;
+  }
+
+  isActionCompleted(action: DayActionDto): boolean {
+    if (!action.plant?.id || !action.trayCount) return false;
+    const plantedCount = this.getPlantedTraysCount(action.plant.id);
+    return plantedCount >= action.trayCount;
   }
 }

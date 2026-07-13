@@ -8,10 +8,12 @@ import { getCurrentDayInWeek } from '../../../utils/date-utils';
 
 import { RouterModule } from '@angular/router';
 
+import { ProvozNavigationComponent } from '../provoz-navigation/provoz-navigation.component';
+
 @Component({
   selector: 'app-transfer',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ProvozNavigationComponent],
   templateUrl: './transfer.component.html',
   styleUrls: ['./transfer.component.scss']
 })

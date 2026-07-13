@@ -10,10 +10,12 @@ import { BatchHarvestDto, BatchDeliveryDto, CropBatchDto, CropBatchUnit, PlantDt
 
 import { RouterModule } from '@angular/router';
 
+import { ProvozNavigationComponent } from '../provoz-navigation/provoz-navigation.component';
+
 @Component({
   selector: 'app-packaging',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ProvozNavigationComponent],
   templateUrl: './packaging.component.html',
   styleUrls: ['./packaging.component.scss']
 })
