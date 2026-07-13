@@ -248,6 +248,7 @@ export interface CropCycleCustomListItemDto {
   state?: CropCycleState;
   harvestId?: ID;
   trayCode?: string;
+  trayPlace?: string;
 }
 
 export interface ApiResponse<T> {

@@ -1,87 +1,228 @@
 <div class="growing-room-container">
+  <app-provoz-navigation></app-provoz-navigation>
   <div class="header">
     <h1>Growing Room (Pěstírna)</h1>
   </div>
 
   <div *ngIf="loading" class="loading">Loading data...</div>
 
-  <div *ngIf="!loading" class="content-grid">
-    <!-- Trays Section -->
-    <div class="section trays-section">
-      <h2>Trays Status</h2>
+  <div *ngIf="!loading">
+    <!-- Today's Planned Actions -->
+    <div class="section actions-section" *ngIf="dayActions.length > 0">
+      <h2>Today's Plan (Transfer & Harvest)</h2>
+      <table class="action-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Plant</th>
+            <th>Trays</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let action of dayActions" [class.completed]="isActionCompleted(action)">
+            <td>
+              <span class="type-badge" [attr.data-type]="action.type">{{ action.type }}</span>
+            </td>
+            <td>
+              <div class="plant-info">
+                <span class="plant-name">{{ action.plant?.name }}</span>
+                <span class="plant-code">{{ action.plant?.code }}</span>
+              </div>
+            </td>
+            <td>{{ action.trayCount }}</td>
+            <td>
+              <span class="status-badge" *ngIf="isActionCompleted(action)">✓ Done</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <div class="trays-by-state">
-        <div *ngFor="let group of traysByState" class="state-group">
-          <h3>{{ group.state }} ({{ group.trays.length }})</h3>
-          <div class="trays-grid">
-            <div
-              *ngFor="let tray of group.trays"
-              class="tray-item"
-              [class.selected]="selectedTray?.id === tray.id"
-              (click)="selectTray(tray)"
-            >
-              <span class="tray-code">{{ tray.code }}</span>
-            </div>
-          </div>
+  <!-- Top row: Pending + Germination -->
+  <div class="top-layout-row">
+    <!-- 1) Pending for Germination -->
+    <div class="section pending-section">
+      <h2>1. Pending for Germination</h2>
+      <div class="pending-list" *ngIf="pendingCycles.length > 0">
+        <div *ngFor="let cycle of pendingCycles"
+             class="tray-item pending"
+             [ngClass]="getTrayColor(cycle)"
+             (click)="onTrayClick(cycle)">
+          <div class="tray-code">{{ cycle.trayCode }}</div>
+          <div class="plant-name-small">{{ cycle.plantName }}</div>
+          <div class="tray-date" *ngIf="getTrayDate(cycle)">{{ getTrayDate(cycle) | date:'dd.MM' }}</div>
         </div>
       </div>
+      <div *ngIf="pendingCycles.length === 0" class="no-data">No trays waiting for germination.</div>
+    </div>
 
-      <div class="in-use-section">
-        <h3>In Use</h3>
-        <div *ngFor="let shelfGroup of shelves" class="shelf-group">
-          <h4>Shelf {{ shelfGroup.shelf }}</h4>
-          <div class="trays-grid">
-            <div
-              *ngFor="let tray of shelfGroup.trays"
-              class="tray-item in-use"
-              [class.selected]="selectedTray?.id === tray.id"
-              (click)="selectTray(tray)"
-            >
-              <span class="tray-code">{{ tray.code }}</span>
-              <span class="place-code">{{ tray.placeCode }}</span>
-            </div>
-          </div>
-        </div>
+    <!-- 2) Germination Room -->
+    <div class="section germination-section">
+      <h2>2. Germination Room (A-D, 1-5)</h2>
+      <div class="room-grid-wrapper">
+        <table class="room-grid germ-grid">
+          <thead>
+            <tr>
+              <th></th>
+              <th *ngFor="let col of germCols">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows; let rIdx = index">
+              <th>{{ row }}</th>
+              <td *ngFor="let col of germCols; let cIdx = index">
+                <div *ngIf="germinationGrid[rIdx][cIdx] as cycle"
+                     class="tray-item germination"
+                     [ngClass]="getTrayColor(cycle)"
+                     (click)="onTrayClick(cycle)">
+                  <div class="tray-code">{{ cycle.trayCode }}</div>
+                  <div class="plant-name-small">{{ cycle.plantName }}</div>
+                  <div class="tray-date">{{ cycle.moveToLightDay | date:'dd.MM' }}</div>
+                </div>
+                <div *ngIf="!germinationGrid[rIdx][cIdx]" class="empty-slot"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <div *ngIf="otherInUseTrays.length > 0" class="shelf-group">
-          <h4>Other Positions</h4>
-          <div class="trays-grid">
-            <div
-              *ngFor="let tray of otherInUseTrays"
-              class="tray-item in-use"
-              [class.selected]="selectedTray?.id === tray.id"
-              (click)="selectTray(tray)"
-            >
-              <span class="tray-code">{{ tray.code }}</span>
-              <span class="place-code">{{ tray.placeCode }}</span>
-            </div>
-          </div>
-        </div>
+    <!-- 3) Light Room -->
+    <div class="section">
+      <h2>3. Light Room (A-D, 1-12)</h2>
+      <div class="room-grid-wrapper overflow-x-auto">
+        <table class="room-grid light-grid">
+          <thead>
+            <tr>
+              <th></th>
+              <th *ngFor="let col of lightCols">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows; let rIdx = index">
+              <th>{{ row }}</th>
+              <td *ngFor="let col of lightCols; let cIdx = index">
+                <div *ngIf="lightGrid[rIdx][cIdx] as cycle"
+                     class="tray-item light"
+                     [ngClass]="getTrayColor(cycle)"
+                     (click)="onTrayClick(cycle)">
+                  <div class="tray-code">{{ cycle.trayCode }}</div>
+                  <div class="plant-name-small">{{ cycle.plantName }}</div>
+                  <div class="tray-date">{{ cycle.harvestDay | date:'dd.MM' }}</div>
+                </div>
+                <div *ngIf="!lightGrid[rIdx][cIdx]" class="empty-slot"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Crop Cycles Section -->
-    <div class="section cycles-section">
-      <h2>Active Crop Cycles</h2>
-      <div class="cycles-list">
-        <div
-          *ngFor="let cycle of activeCropCycles"
-          class="cycle-item"
-          [class.highlighted]="isCycleHighlighted(cycle)"
-        >
-          <div class="cycle-info">
-            <span class="plant-name">{{ cycle.plantName }}</span>
-            <span class="tray-info">Tray: {{ cycle.trayCode }}</span>
-            <span class="state-badge" [attr.data-state]="cycle.state">{{ cycle.state }}</span>
-          </div>
-          <div class="cycle-dates">
-            <span>Seeding: {{ cycle.seedingDay }}</span>
-          </div>
+    <!-- Batch Harvest Section -->
+    <div class="section" *ngIf="todayBatchHarvest">
+      <h2>Summary (Batch Harvest)</h2>
+      <div>
+        <table class="action-table">
+          <thead>
+          <tr>
+            <th>Crop</th>
+            <th>Total Weight (g)</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let item of todayBatchHarvest.harvestedCrops">
+            <td>{{ item.plant?.name }}</td>
+            <td>{{ item.amount }} {{item.unit}}</td>
+          </tr>
+          <tr *ngIf="!todayBatchHarvest.harvestedCrops || todayBatchHarvest.harvestedCrops.length === 0">
+            <td colspan="2" class="text-center">No crops harvested yet.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Move Modal -->
+  <div class="modal-backdrop" *ngIf="showMoveModal" (click)="showMoveModal = false"></div>
+  <div class="modal" *ngIf="showMoveModal">
+    <div class="modal-header">
+      <h3>Move Tray {{ selectedCycle?.trayCode }}</h3>
+      <button class="close-btn" (click)="showMoveModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Current State: <strong>{{ selectedCycle?.state }}</strong></p>
+      <p>Target: <strong>{{ selectedCycle?.state === 'PENDING' ? 'GERMINATION' : 'LIGHT' }}</strong></p>
+
+      <div class="warning-alert" *ngIf="selectedCycle && getDateWarning(selectedCycle)">
+        ⚠️ {{ getDateWarning(selectedCycle) }}
+      </div>
+
+      <div class="form-group">
+        <label>Enter Shelf Code (e.g., A1, B3):</label>
+        <div class="shelf-input-wrapper">
+          <input type="text" class="form-control" [(ngModel)]="shelfCode" placeholder="A1">
+          <button class="btn-clear" (click)="clearShelfCode()">×</button>
         </div>
       </div>
-      <div *ngIf="activeCropCycles.length === 0" class="no-data">
-        No active crop cycles.
+
+      <div class="keypad-container">
+        <div class="keypad letters">
+          <button *ngFor="let letter of keypadLetters" class="keypad-btn letter" (click)="addToShelfCode(letter)">{{ letter }}</button>
+        </div>
+        <div class="keypad numbers">
+          <button *ngFor="let num of keypadNumbers" class="keypad-btn" (click)="addToShelfCode(num)">{{ num }}</button>
+        </div>
       </div>
+
+      <div class="validation-error" *ngIf="shelfCode && !isValidPlace(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT')">
+        Invalid place code format or out of range.
+      </div>
+      <div class="validation-error" *ngIf="shelfCode && isValidPlace(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT') && isPlaceOccupied(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT')">
+        This place is already occupied!
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="showMoveModal = false">Cancel</button>
+      <button class="btn btn-success"
+              [disabled]="!shelfCode || !isValidPlace(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT') || isPlaceOccupied(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT')"
+              (click)="confirmMove()">
+        Confirm Move
+      </button>
+    </div>
+  </div>
+
+  <!-- Harvest Modal -->
+  <div class="modal-backdrop" *ngIf="showHarvestModal" (click)="showHarvestModal = false"></div>
+  <div class="modal" *ngIf="showHarvestModal">
+    <div class="modal-header">
+      <h3>Harvest Tray {{ selectedCycle?.trayCode }}</h3>
+      <button class="close-btn" (click)="showHarvestModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Plant: <strong>{{ selectedCycle?.plantName }}</strong></p>
+
+      <div class="warning-alert" *ngIf="selectedCycle && getDateWarning(selectedCycle)">
+        ⚠️ {{ getDateWarning(selectedCycle) }}
+      </div>
+
+      <div class="form-group">
+        <label>Harvested Weight (g):</label>
+        <div class="weight-input-wrapper">
+          <input type="number" class="form-control" [(ngModel)]="harvestWeight" placeholder="0">
+          <button class="btn-clear" (click)="clearWeight()">×</button>
+        </div>
+      </div>
+
+      <div class="keypad">
+        <button *ngFor="let num of keypadNumbers" class="keypad-btn" (click)="addToWeight(num)">{{ num }}</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="showHarvestModal = false">Cancel</button>
+      <button class="btn btn-primary" [disabled]="!harvestWeight" (click)="confirmHarvest()">Confirm Harvest</button>
     </div>
   </div>
 </div>
