@@ -146,11 +146,11 @@
   </div>
 
   <!-- Move Modal -->
-  <div class="modal-backdrop" *ngIf="showMoveModal" (click)="showMoveModal = false"></div>
+  <div class="modal-backdrop" *ngIf="showMoveModal" (click)="!processing && (showMoveModal = false)"></div>
   <div class="modal" *ngIf="showMoveModal">
     <div class="modal-header">
       <h3>Move Tray {{ selectedCycle?.trayCode }}</h3>
-      <button class="close-btn" (click)="showMoveModal = false">×</button>
+      <button class="close-btn" [disabled]="processing" (click)="showMoveModal = false">×</button>
     </div>
     <div class="modal-body">
       <p>Current State: <strong>{{ selectedCycle?.state }}</strong></p>
@@ -163,17 +163,17 @@
       <div class="form-group">
         <label>Enter Shelf Code (e.g., A1, B3):</label>
         <div class="shelf-input-wrapper">
-          <input type="text" class="form-control" [(ngModel)]="shelfCode" placeholder="A1">
-          <button class="btn-clear" (click)="clearShelfCode()">×</button>
+          <input type="text" class="form-control" [disabled]="processing" [(ngModel)]="shelfCode" placeholder="A1">
+          <button class="btn-clear" [disabled]="processing" (click)="clearShelfCode()">×</button>
         </div>
       </div>
 
       <div class="keypad-container">
         <div class="keypad letters">
-          <button *ngFor="let letter of keypadLetters" class="keypad-btn letter" (click)="addToShelfCode(letter)">{{ letter }}</button>
+          <button *ngFor="let letter of keypadLetters" class="keypad-btn letter" [disabled]="processing" (click)="addToShelfCode(letter)">{{ letter }}</button>
         </div>
         <div class="keypad numbers">
-          <button *ngFor="let num of keypadNumbers" class="keypad-btn" (click)="addToShelfCode(num)">{{ num }}</button>
+          <button *ngFor="let num of keypadNumbers" class="keypad-btn" [disabled]="processing" (click)="addToShelfCode(num)">{{ num }}</button>
         </div>
       </div>
 
@@ -185,21 +185,21 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="showMoveModal = false">Cancel</button>
+      <button class="btn btn-secondary" [disabled]="processing" (click)="showMoveModal = false">Cancel</button>
       <button class="btn btn-success"
-              [disabled]="!shelfCode || !isValidPlace(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT') || isPlaceOccupied(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT')"
+              [disabled]="processing || !shelfCode || !isValidPlace(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT') || isPlaceOccupied(shelfCode, selectedCycle?.state === 'PENDING' ? 'GERM' : 'LIGHT')"
               (click)="confirmMove()">
-        Confirm Move
+        {{ processing ? 'Moving...' : 'Confirm Move' }}
       </button>
     </div>
   </div>
 
   <!-- Harvest Modal -->
-  <div class="modal-backdrop" *ngIf="showHarvestModal" (click)="showHarvestModal = false"></div>
+  <div class="modal-backdrop" *ngIf="showHarvestModal" (click)="!processing && (showHarvestModal = false)"></div>
   <div class="modal" *ngIf="showHarvestModal">
     <div class="modal-header">
       <h3>Harvest Tray {{ selectedCycle?.trayCode }}</h3>
-      <button class="close-btn" (click)="showHarvestModal = false">×</button>
+      <button class="close-btn" [disabled]="processing" (click)="showHarvestModal = false">×</button>
     </div>
     <div class="modal-body">
       <p>Plant: <strong>{{ selectedCycle?.plantName }}</strong></p>
@@ -211,18 +211,20 @@
       <div class="form-group">
         <label>Harvested Weight (g):</label>
         <div class="weight-input-wrapper">
-          <input type="number" class="form-control" [(ngModel)]="harvestWeight" placeholder="0">
-          <button class="btn-clear" (click)="clearWeight()">×</button>
+          <input type="number" class="form-control" [disabled]="processing" [(ngModel)]="harvestWeight" placeholder="0">
+          <button class="btn-clear" [disabled]="processing" (click)="clearWeight()">×</button>
         </div>
       </div>
 
       <div class="keypad">
-        <button *ngFor="let num of keypadNumbers" class="keypad-btn" (click)="addToWeight(num)">{{ num }}</button>
+        <button *ngFor="let num of keypadNumbers" class="keypad-btn" [disabled]="processing" (click)="addToWeight(num)">{{ num }}</button>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="showHarvestModal = false">Cancel</button>
-      <button class="btn btn-primary" [disabled]="!harvestWeight" (click)="confirmHarvest()">Confirm Harvest</button>
+      <button class="btn btn-secondary" [disabled]="processing" (click)="showHarvestModal = false">Cancel</button>
+      <button class="btn btn-primary" [disabled]="processing || !harvestWeight" (click)="confirmHarvest()">
+        {{ processing ? 'Harvesting...' : 'Confirm Harvest' }}
+      </button>
     </div>
   </div>
 </div>

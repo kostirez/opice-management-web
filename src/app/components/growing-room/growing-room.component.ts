@@ -21,6 +21,7 @@ import { ProvozNavigationComponent } from '../provoz/provoz-navigation/provoz-na
 })
 export class GrowingRoomComponent implements OnInit {
   loading = false;
+  processing = false;
   activeCropCycles: CropCycleCustomListItemDto[] = [];
   dayActions: DayActionDto[] = [];
   todayBatchHarvest: BatchHarvestDto | null = null;
@@ -146,8 +147,9 @@ export class GrowingRoomComponent implements OnInit {
   }
 
   confirmMove() {
-    if (!this.selectedCycle?.id || !this.shelfCode) return;
+    if (!this.selectedCycle?.id || !this.shelfCode || this.processing) return;
 
+    this.processing = true;
     let newState = this.selectedCycle.state;
     let placePrefix = '';
     if (this.selectedCycle.state === 'PENDING') {
@@ -163,10 +165,14 @@ export class GrowingRoomComponent implements OnInit {
       placeCode: placePrefix + this.shelfCode.toUpperCase()
     }).subscribe({
       next: () => {
+        this.processing = false;
         this.showMoveModal = false;
         this.loadActiveCropCycles();
       },
-      error: (err) => console.error('Error moving', err)
+      error: (err) => {
+        console.error('Error moving', err);
+        this.processing = false;
+      }
     });
   }
 
@@ -177,13 +183,18 @@ export class GrowingRoomComponent implements OnInit {
   }
 
   confirmHarvest() {
-    if (!this.selectedCycle?.id || this.harvestWeight === null) return;
+    if (!this.selectedCycle?.id || this.harvestWeight === null || this.processing) return;
 
+    this.processing = true;
     if (!this.todayBatchHarvest) {
       this.batchHarvestService.createBatchHarvest({ date: this.today }).subscribe({
         next: (resp) => {
           this.todayBatchHarvest = resp.data;
           this.saveHarvestEntry();
+        },
+        error: (err) => {
+          console.error('Error creating batch harvest', err);
+          this.processing = false;
         }
       });
     } else {
@@ -192,7 +203,10 @@ export class GrowingRoomComponent implements OnInit {
   }
 
   private saveHarvestEntry() {
-    if (!this.selectedCycle?.id || this.harvestWeight === null || !this.todayBatchHarvest?.id) return;
+    if (!this.selectedCycle?.id || this.harvestWeight === null || !this.todayBatchHarvest?.id) {
+      this.processing = false;
+      return;
+    }
 
     this.cropCycleHarvestService.createCropCycleHarvest({
       crop_cycle: this.selectedCycle.id as any,
@@ -201,11 +215,15 @@ export class GrowingRoomComponent implements OnInit {
       performedAt: new Date().toISOString()
     }).subscribe({
       next: () => {
+        this.processing = false;
         this.showHarvestModal = false;
         this.loadActiveCropCycles();
         this.loadTodayBatchHarvest();
       },
-      error: (err) => console.error('Error harvesting', err)
+      error: (err) => {
+        console.error('Error harvesting', err);
+        this.processing = false;
+      }
     });
   }
 
